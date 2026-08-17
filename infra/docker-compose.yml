@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: merea-crm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: merea_crm
+      POSTGRES_USER: crm_user
+      POSTGRES_PASSWORD: crm_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crm_user -d merea_crm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+    container_name: merea-crm-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://crm_user:crm_password@db:5432/merea_crm
+      BACKEND_CORS_ORIGINS: http://localhost:5173,http://localhost:8080,http://localhost
+      N8N_WEBHOOK_TOKEN: change-me
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../data:/app/data
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: merea-crm-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:

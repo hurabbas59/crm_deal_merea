@@ -1,0 +1,3676 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pipeline · Immobilien-Investment</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+<style>
+  :root{
+    --bg:#F5F5F7;
+    --surface:#FFFFFF;
+    --border:#E5E5EA;
+    --border-strong:#D2D2D7;
+    --text:#1D1D1F;
+    --text-muted:#6E6E73;
+    --text-faint:#8E8E93;
+    --primary:#0071E3;
+    --primary-hover:#0077ED;
+    --primary-soft:#E8F1FD;
+    --input-accent:#155EFF;
+    --input-fill:#EFF3FA;
+    --input-fill-hover:#E3EAF6;
+    --accent-2:#30B0C7;
+    --gradient: #0071E3;
+    --gradient-soft: #E8F1FD;
+    --sidebar-bg:rgba(246,246,248,0.85);
+    --danger:#FF3B30;
+    --danger-soft:#FFEEEE;
+    --ok:#34C759;
+    --ok-soft:#E9FBEF;
+    --warn:#FF9500;
+    --warn-soft:#FFF4E5;
+    --radius-sm:10px;
+    --radius:14px;
+    --radius-lg:18px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 16px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,0.14), 0 4px 14px rgba(0,0,0,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    line-height:1.47;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  .num, .tnum{font-variant-numeric: tabular-nums;}
+  button, input, select, textarea{font-family:inherit; font-size:inherit; color:inherit;}
+  button{cursor:pointer;}
+  ::-webkit-scrollbar{height:8px; width:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#c7c7cc; border-radius:8px;}
+  a{color:var(--primary);}
+
+  svg.icon{width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0;}
+
+  /* ---------------- APP SHELL ---------------- */
+  #app{display:grid; grid-template-columns:220px 1fr; min-height:100vh;}
+
+  /* ---------------- SIDEBAR ---------------- */
+  .sidebar{
+    background:var(--bg);
+    border-right:1px solid var(--border);
+    padding:22px 18px;
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh; overflow-y:auto; align-self:start;
+  }
+  .sidebar-logo{display:flex; align-items:center; gap:9px; padding:0 2px 14px;}
+  .logo-mark{flex-shrink:0;}
+  .sidebar-logo-word{line-height:1.05;}
+  .sidebar-logo-word b{font-size:13.5px; font-weight:800; letter-spacing:0.02em; color:var(--text);}
+  .sidebar-logo-word span{font-size:11px; font-weight:500; letter-spacing:0.05em; color:var(--text-faint); margin-left:2px;}
+  .sidebar-eyebrow{font-size:10.5px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#C9852E; padding:0 2px 22px; border-bottom:1px solid var(--border); margin-bottom:16px;}
+
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 8px 22px;}
+  .brand-text b{font-size:14.5px; font-weight:700; letter-spacing:-0.01em; display:block;}
+  .brand-text span{font-size:11px; color:var(--text-faint);}
+
+  .nav{display:flex; flex-direction:column; gap:1px;}
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 6px; border-radius:7px; cursor:pointer;
+    color:#8A8A93; font-size:13.5px; font-weight:500;
+    background:transparent; border:none; text-align:left; width:100%;
+  }
+  .nav-item svg{stroke:#B0B0B8;}
+  .nav-item:hover{color:var(--text);}
+  .nav-item:hover svg{stroke:var(--text);}
+  .nav-item.active{background:transparent; color:var(--text); font-weight:700;}
+  .nav-item.active svg{stroke:var(--text);}
+  .nav-item .count{margin-left:auto; font-size:11px; color:var(--text-faint); font-weight:600;}
+  .nav-item.active .count{color:var(--text-muted);}
+
+  .btn-new{
+    margin:16px 0 18px;
+    background:var(--text); color:#fff; border:none; border-radius:980px;
+    padding:9px 16px; font-weight:600; font-size:13.5px; cursor:pointer;
+    display:flex; align-items:center; gap:8px; justify-content:center;
+    transition:filter 0.15s ease;
+  }
+  .btn-new:hover{filter:brightness(1.3);}
+  .btn-new svg{stroke:#fff; width:16px; height:16px;}
+
+  .sidebar-footer{margin-top:auto; padding-top:14px; border-top:1px solid var(--border);}
+
+  .excel-box{margin-top:16px; padding-top:14px; border-top:1px solid var(--border);}
+  .excel-box-title{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-bottom:6px;}
+  .excel-box-status{font-size:11.5px; color:var(--text-muted); margin-bottom:8px; line-height:1.4; word-break:break-word;}
+  .excel-box-status.linked{color:var(--ok); font-weight:600;}
+  .excel-box-actions{display:flex; flex-direction:column; gap:6px;}
+  .excel-box-actions button, .excel-box-actions label{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    border:1px solid var(--border); background:var(--surface); border-radius:8px; padding:7px 10px;
+    font-size:11.5px; font-weight:600; color:#3F4350; cursor:pointer; text-align:center;
+  }
+  .excel-box-actions button:hover, .excel-box-actions label:hover{border-color:var(--border-strong);}
+  .excel-box-actions button.primary-ish{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .sidebar-footer p{margin:0; font-size:11.5px; color:var(--text-faint); line-height:1.5;}
+
+  .sidebar-section{margin-top:18px; padding-top:14px; border-top:1px solid var(--border); overflow-y:auto;}
+  .sidebar-section-title{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); padding:0 10px 8px;}
+  .recent-item{
+    display:flex; align-items:center; gap:9px; padding:7px 10px; border-radius:8px; cursor:pointer;
+    font-size:12.5px; color:#3F4350; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .recent-item:hover{background:#F2F3F6;}
+  .recent-item .ri-icon{width:22px; height:22px; border-radius:6px; background:var(--bg); display:flex; align-items:center; justify-content:center; color:var(--text-faint); flex-shrink:0;}
+  .recent-item .ri-icon svg{width:12px; height:12px;}
+  .recent-item span.ri-label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+  /* ---------------- MAIN ---------------- */
+  .main{padding:26px 34px 60px; max-width:1500px;}
+  .view-header{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px; gap:20px; flex-wrap:wrap;}
+  .view-header h1{font-size:22px; font-weight:700; margin:0; letter-spacing:-0.02em;}
+  .view-header p.sub{margin:4px 0 0; color:var(--text-muted); font-size:13px;}
+  .view-header.plain{padding-bottom:20px; border-bottom:1px solid var(--border); margin-bottom:22px;}
+
+  /* ---------------- FLAT LIST (Kontakte etc.) ---------------- */
+  .flat-list{display:flex; flex-direction:column;}
+  .flat-list-row{display:flex; align-items:center; gap:14px; padding:14px 4px; border-bottom:1px solid #F0F0F2; cursor:pointer;}
+  .flat-list-row:last-child{border-bottom:none;}
+  .flat-list-row:hover{background:#FAFAFB;}
+  .flat-avatar{width:36px; height:36px; border-radius:50%; background:#EFEFF1; color:#8A8A93; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .flat-row-main{flex:1; min-width:0;}
+  .flat-row-name{font-size:13.5px; font-weight:700; color:var(--text);}
+  .flat-row-sub{font-size:12.5px; color:#5B7FA6; margin-top:1px;}
+  .flat-row-deals{font-size:12.5px; color:var(--text-faint); width:70px; text-align:right; flex-shrink:0;}
+  .role-pill{font-size:11px; font-weight:600; padding:4px 12px; border-radius:20px; flex-shrink:0; min-width:76px; text-align:center;}
+  .role-pill.role-Eigentümer{background:#F4F4F5; color:#C4C4CC;}
+  .role-pill.role-Makler{background:#E6F7ED; color:#1E9E56;}
+  .role-pill.role-Notar{background:#FFFFFF; color:#6B6B7D; border:1px solid var(--border);}
+  .role-pill.role-Sonstige{background:#F0F0F2; color:#8A8A93;}
+
+  /* ---------------- TOOLBAR ---------------- */
+  .toolbar{display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap;}
+  .search-box{
+    display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border);
+    border-radius:9px; padding:8px 12px; min-width:240px; flex:1; max-width:340px;
+  }
+  .search-box svg{color:var(--text-faint);}
+  .search-box input{border:none; outline:none; flex:1; background:transparent; font-size:13.5px;}
+  .filter-select{
+    background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 12px;
+    font-size:12.5px; font-weight:500; color:#3F4350; cursor:pointer;
+  }
+  tr.row-done td{opacity:0.55;}
+  .tb-btn{
+    display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border);
+    border-radius:9px; padding:8px 12px; font-size:13px; font-weight:500; color:#3F4350; position:relative;
+  }
+  .tb-btn:hover{border-color:var(--border-strong);}
+  .tb-btn.active-filter{border-color:var(--primary); color:var(--primary); background:var(--primary-soft);}
+  .tb-btn svg{width:15px; height:15px;}
+  .tb-badge{background:var(--primary); color:#fff; font-size:10px; font-weight:700; border-radius:20px; padding:1px 6px; margin-left:2px;}
+
+  .chip-row{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    border:1px solid var(--border); background:var(--surface); color:#3F4350;
+    border-radius:20px; padding:7px 13px; font-size:12.5px; cursor:pointer; font-weight:500;
+  }
+  .chip:hover{border-color:var(--border-strong);}
+  .chip.active{background:var(--text); border-color:var(--text); color:#fff;}
+
+  .dropdown-panel{
+    position:absolute; top:calc(100% + 6px); left:0; background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; box-shadow:var(--shadow-lg); padding:10px; min-width:220px; z-index:50;
+  }
+  .dropdown-panel label{display:flex; align-items:center; gap:8px; padding:6px 4px; font-size:13px; cursor:pointer; border-radius:6px;}
+  .dropdown-panel label:hover{background:var(--bg);}
+  .view-toggle{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:3px; gap:2px;}
+  .view-toggle button{background:transparent; border:none; padding:6px 12px; border-radius:7px; font-size:13px; font-weight:500; color:var(--text-muted); display:flex; align-items:center; gap:6px;}
+  .view-toggle button.active{background:var(--surface); color:var(--primary); box-shadow:var(--shadow-sm);}
+
+  /* ---------------- PILLS / BADGES ---------------- */
+  .pill{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap;}
+  .pill-neu{background:#ECFDF5; color:#047857;}
+  .pill-pruefung{background:#EFF6FF; color:#1D4ED8;}
+  .pill-kalkulation{background:#F5F3FF; color:#6D28D9;}
+  .pill-loi{background:#FFFBEB; color:#B45309;}
+  .pill-dd{background:#FFF7ED; color:#C2410C;}
+  .pill-notar{background:#EEF2FF; color:#4338CA;}
+  .pill-abgesagt{background:#F3F4F6; color:#6B7280;}
+
+  .type-badge{font-size:10.5px; font-weight:700; letter-spacing:0.02em; padding:3px 8px; border-radius:6px; white-space:nowrap;}
+  .type-badge.pe{background:#EEF2FF; color:#4338CA;}
+  .type-badge.mfh{background:#ECFDF5; color:#047857;}
+
+  .role-badge{font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:6px; background:#F3F4F6; color:#4B5563;}
+
+  /* ---------------- KPI CARDS ---------------- */
+  .kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:28px;}
+  .kpi-card{background:var(--surface); border-radius:var(--radius); padding:20px 22px; border:1px solid var(--border); box-shadow:var(--shadow-sm); transition:box-shadow 0.15s ease;}
+  .kpi-card:hover{box-shadow:var(--shadow);}
+  .kpi-label{font-size:12px; color:var(--text-muted); font-weight:500; margin-bottom:12px;}
+  .kpi-value{font-size:27px; font-weight:700; letter-spacing:-0.015em;}
+  .kpi-value.danger{color:var(--danger);}
+  .kpi-sub{font-size:12px; color:var(--text-faint); margin-top:5px;}
+
+  .panel{background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:24px 26px; margin-bottom:24px; box-shadow:var(--shadow-sm);}
+  .panel h3{margin:0 0 16px; font-size:14.5px; font-weight:700; letter-spacing:-0.01em;}
+
+  /* ---------------- FUNNEL / KONVERSIONS-CHART ---------------- */
+  .funnel-top{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
+  .funnel-title{font-size:15px; font-weight:700;}
+  .funnel-icon{margin-right:2px;}
+  .funnel-sub{font-size:10.5px; font-weight:700; letter-spacing:0.06em; color:var(--text-faint);}
+  .funnel-headline{font-size:14px; font-weight:600; color:var(--text-muted); margin:14px 0 16px;}
+  .metric-toggle{display:inline-flex; background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:3px; gap:2px; margin-bottom:24px;}
+  .metric-btn{background:transparent; border:none; padding:7px 14px; border-radius:7px; font-size:12.5px; font-weight:600; color:var(--text-muted); cursor:pointer;}
+  .metric-btn.active{background:var(--surface); color:var(--text); box-shadow:var(--shadow-sm);}
+  .funnel-chart{display:flex; align-items:flex-end; gap:4px; height:220px; padding-top:10px; overflow-x:auto;}
+  .funnel-col{display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; flex:1; min-width:70px;}
+  .funnel-value{font-size:13px; font-weight:700; margin-bottom:8px; white-space:nowrap;}
+  .funnel-bar{width:56%; min-width:34px; border-radius:6px 6px 2px 2px; transition:height 0.2s ease;}
+  .funnel-label{margin-top:10px; font-size:11.5px; color:var(--text-muted); text-align:center; white-space:nowrap;}
+  .funnel-arrow{
+    background:#3A3A3E; color:#fff; font-size:11px; font-weight:700; padding:5px 10px 5px 8px;
+    clip-path:polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%, 14% 50%);
+    margin-bottom:34px; flex-shrink:0; white-space:nowrap;
+  }
+  .funnel-legend{margin-top:18px; font-size:12px; color:var(--text-muted); display:flex; align-items:center;}
+  .legend-dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px;}
+
+  .bar-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F2F3F6;}
+  .bar-row:last-child{border-bottom:none;}
+  .bar-row .label{width:150px; font-size:13px; font-weight:500; flex-shrink:0;}
+  .bar-track{flex:1; height:8px; background:#EFF0F3; border-radius:8px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--gradient); border-radius:8px;}
+  .bar-row .count{width:130px; text-align:right; font-size:12.5px; color:var(--text-muted); flex-shrink:0;}
+
+  .task-alert-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #F2F3F6; gap:10px;}
+  .task-alert-row:last-child{border-bottom:none;}
+  .task-alert-row .ttitle{font-size:13.5px;}
+  .task-alert-row .ttitle b{font-weight:600; cursor:pointer;}
+  .task-alert-row .ttitle b:hover{color:var(--primary);}
+  .task-alert-row .tdue{font-size:12px; color:var(--danger); font-weight:600; flex-shrink:0;}
+
+  .empty-state{padding:30px 10px; text-align:center; color:var(--text-faint); font-size:13.5px;}
+
+  /* ---------------- TABLE (DEALS) ---------------- */
+  .table-wrap{background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; box-shadow:var(--shadow-sm);}
+  .table-wrap.table-wrap-plain{background:transparent; border:none; box-shadow:none; border-radius:0;}
+  table.deals{width:100%; border-collapse:collapse; font-size:13px;}
+  table.deals th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);
+    font-weight:700; padding:14px 16px; border-bottom:1px solid var(--border); background:#FAFAFB; cursor:pointer; user-select:none;
+  }
+  table.deals th:hover{color:var(--text-muted);}
+  table.deals th.sorted{color:var(--primary);}
+  table.deals td{padding:13px 16px; border-bottom:1px solid #F2F3F6; vertical-align:middle;}
+  table.deals tbody tr{cursor:pointer; transition:background 0.12s ease;}
+  table.deals tbody tr:hover{background:#FAFBFF;}
+  table.deals tbody tr:last-child td{border-bottom:none;}
+  .thumb{width:42px; height:42px; border-radius:10px; background:#F0F1F4; display:flex; align-items:center; justify-content:center; color:#B7BAC3; overflow:hidden; flex-shrink:0;}
+  .thumb svg{width:19px; height:19px;}
+  .cell-name{font-weight:600;}
+  .cell-sub{font-size:12px; color:var(--text-faint); margin-top:1px;}
+  .cell-name-wrap{display:flex; align-items:center; gap:12px;}
+  table.deals td.chk-col, table.deals th.chk-col{width:36px; padding-right:0;}
+  table.deals input[type="checkbox"]{width:15px; height:15px; accent-color:var(--primary); cursor:pointer;}
+
+  table.compare-table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.compare-table th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); font-weight:700; padding:2px 4px 6px;}
+  table.compare-table td{padding:3px 4px; vertical-align:middle; color:var(--text-muted);}
+  table.compare-table td.tnum{color:var(--text); text-align:right;}
+  table.compare-table th.tnum{text-align:right;}
+  table.compare-table tr.total-row td{font-weight:700; color:var(--text); padding-top:7px;}
+  table.compare-table input.line-input{padding:3px 5px; text-align:right;}
+  .row-actions{position:relative;}
+  .row-more-btn{width:28px; height:28px; border-radius:7px; border:none; background:transparent; color:var(--text-faint); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700;}
+  .row-more-btn:hover{background:#F0F1F4; color:var(--text);}
+  .row-menu{position:absolute; right:0; top:calc(100% + 4px); background:var(--surface); border:1px solid var(--border); border-radius:9px; box-shadow:var(--shadow-lg); min-width:150px; z-index:60; overflow:hidden;}
+  .row-menu button{display:block; width:100%; text-align:left; background:none; border:none; padding:9px 13px; font-size:12.5px; color:#3F4350;}
+  .row-menu button:hover{background:var(--bg);}
+  .row-menu button.danger{color:var(--danger);}
+  .bulk-bar{display:flex; align-items:center; gap:12px; background:var(--text); color:#fff; border-radius:10px; padding:10px 16px; margin-bottom:14px; font-size:13px;}
+  .bulk-bar button{background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:7px; padding:6px 12px; font-size:12px;}
+  .bulk-bar button:hover{background:rgba(255,255,255,0.2);}
+
+  /* ---------------- KANBAN ---------------- */
+  .kanban-scroll{display:flex; gap:14px; overflow-x:auto; padding-bottom:14px; align-items:flex-start;}
+  .kanban-col{background:transparent; border:1px solid transparent; border-radius:var(--radius); min-width:280px; max-width:280px; flex-shrink:0; padding:12px; transition:background 0.12s ease, border-color 0.12s ease;}
+  .kanban-col.absagen{opacity:0.7;}
+  .kanban-col.drag-over{background:var(--primary-soft); border-color:var(--primary);}
+  .kanban-col-head{display:flex; justify-content:space-between; align-items:center; padding:2px 4px 10px;}
+  .kanban-col-head .colname{font-size:12.5px; font-weight:700;}
+  .kanban-col-count{font-size:11.5px; color:var(--text-faint); font-weight:600; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:2px 8px;}
+  .kanban-col-bar{height:3px; border-radius:3px; margin:0 4px 10px;}
+  .kanban-col-vol{font-size:11px; color:var(--text-faint); padding:0 4px 10px;}
+  .kanban-cards{display:flex; flex-direction:column; gap:9px; min-height:60px;}
+
+  .card{
+    background:var(--surface); border-radius:13px; border:1px solid var(--border);
+    padding:14px 15px; cursor:grab; box-shadow:var(--shadow-sm); transition:box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover{border-color:var(--border-strong); box-shadow:var(--shadow); transform:translateY(-1px);}
+  .card.dragging{opacity:0.4;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:6px;}
+  .card-title{font-weight:600; font-size:13px; margin:0; line-height:1.3;}
+  .card-sub{font-size:11.5px; color:var(--text-faint); margin:3px 0 10px;}
+  .card-meta{display:flex; justify-content:space-between; align-items:center;}
+  .card-price{font-size:13px; font-weight:700;}
+  .card-margin{font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; background:var(--ok-soft); color:var(--ok);}
+  .card-margin.neg{background:var(--danger-soft); color:var(--danger);}
+  .card-tasks{display:flex; align-items:center; gap:5px; margin-top:9px;}
+  .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .dot.ok{background:var(--ok);}
+  .dot.warn{background:var(--warn);}
+  .dot.overdue{background:var(--danger);}
+  .dot.none{background:#D7D9E0;}
+  .card-tasks span{font-size:11px; color:var(--text-faint);}
+
+  /* ---------------- BUTTONS ---------------- */
+  .btn{border:1px solid var(--border); background:var(--surface); border-radius:9px; padding:8px 14px; font-size:12.5px; cursor:pointer; font-weight:500; color:#3F4350; transition:all 0.12s ease;}
+  .btn:hover{border-color:var(--border-strong); box-shadow:var(--shadow-sm);}
+  .btn.primary{background:var(--primary); border-color:transparent; color:#fff; font-weight:600; box-shadow:none; border-radius:980px; padding:8px 18px;}
+  .btn.primary:hover{background:var(--primary-hover); box-shadow:none;}
+  .btn.danger-outline{color:var(--danger); border-color:#F3D2D2;}
+  .btn.danger-outline:hover{background:var(--danger-soft);}
+  .btn.small{padding:5px 10px; font-size:11.5px;}
+  .btn.ghost{border-color:transparent; background:transparent;}
+  .btn.ghost:hover{background:#F2F3F6;}
+  .icon-btn{width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; color:#3F4350; transition:all 0.12s ease;}
+  .icon-btn:hover{border-color:var(--border-strong); box-shadow:var(--shadow-sm);}
+
+  /* ---------------- MODAL (OBJECT DETAIL) ---------------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(17,20,28,0.45); z-index:1000;
+    display:flex; align-items:flex-start; justify-content:center; padding:26px 20px; overflow-y:auto;
+  }
+  .modal{
+    background:var(--bg); border-radius:16px; width:100%; max-width:1220px;
+    box-shadow:var(--shadow-lg); overflow:hidden;
+  }
+  .modal-head{background:var(--surface); border-bottom:1px solid var(--border); padding:18px 26px;}
+  .breadcrumb{font-size:12px; color:var(--text-faint); margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+  .modal-head-row{display:flex; justify-content:space-between; align-items:flex-start; gap:16px;}
+  .modal-head-left{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .thumb-lg{width:44px; height:44px; border-radius:10px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .thumb-lg svg{width:22px; height:22px;}
+  .title-input{
+    background:transparent; color:var(--text); font-size:18px; font-weight:700;
+    padding:2px 1px; width:auto; max-width:100%;
+  }
+  .modal-head-actions{display:flex; align-items:center; gap:6px; padding-left:14px; margin-left:4px; border-left:1px solid var(--border);}
+  select.phase-select{
+    -webkit-appearance:none; appearance:none; border:none; border-radius:20px; padding:4px 26px 4px 12px; font-size:11.5px; font-weight:600; cursor:pointer;
+    background-image:url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6B7D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 8px center; background-size:12px;
+  }
+  select.phase-select:focus{outline:2px solid var(--primary); outline-offset:1px;}
+
+  .tabbar{display:flex; gap:4px; background:var(--surface); padding:0 26px; border-bottom:1px solid var(--border);}
+  .tab-btn{
+    background:transparent; border:none; color:var(--text-muted); padding:12px 4px; margin-right:22px; font-size:13px; font-weight:500;
+    cursor:pointer; border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--text); border-bottom-color:var(--primary); font-weight:600;}
+
+  /* ---------------- OBJECT PAGE (full-page detail, no popup) ---------------- */
+  .object-sticky-head{position:sticky; top:0; z-index:80; background:var(--bg); padding-top:2px; margin-top:-2px;}
+  .object-header{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius) var(--radius) 0 0; padding:16px 22px 0; box-shadow:var(--shadow-sm);}
+  .back-link{background:none; border:none; color:var(--text-muted); font-size:12.5px; font-weight:500; padding:0 0 12px; cursor:pointer;}
+  .back-link:hover{color:var(--primary);}
+  .object-header-top{display:flex; align-items:flex-start; gap:14px; padding-bottom:16px;}
+  .object-subline{display:flex; align-items:center; gap:10px; margin-top:6px; flex-wrap:wrap; font-size:12.5px; color:var(--text-faint);}
+  .subline-faint{color:var(--text-faint); font-size:12px;}
+  .page-tabbar{background:var(--surface); border:1px solid var(--border); border-top:none; padding:0 22px; margin-bottom:0;}
+  .object-body{background:var(--surface); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--radius) var(--radius); padding:24px 26px 30px; box-shadow:var(--shadow-sm);}
+
+  .obj-summary{margin:18px 0 26px;}
+  .obj-summary-address{font-size:20px; font-weight:700; letter-spacing:-0.015em;}
+  .obj-summary-specs{font-size:13px; color:var(--text-faint); margin-top:6px;}
+
+  .makler-box{max-width:420px; margin-bottom:26px;}
+  .makler-box-row{display:flex; align-items:center; gap:12px;}
+  .makler-box-avatar{width:38px; height:38px; border-radius:50%; background:var(--primary); color:#fff; font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+  .makler-box-contacts{display:flex; flex-direction:column; gap:6px; margin-top:14px; padding-top:14px; border-top:1px solid #F2F3F6;}
+  .makler-box-link{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text); text-decoration:none;}
+  .makler-box-link:hover{color:var(--primary);}
+  .makler-box-link svg{width:14px; height:14px; color:var(--text-faint); flex-shrink:0;}
+
+  .toggle-btn{display:inline-flex; align-items:center; gap:7px;}
+  .collapse-block{margin-bottom:22px; padding-bottom:22px; border-bottom:1px solid var(--border);}
+  .collapse-block:last-of-type{border-bottom:none;}
+
+  .keyfacts-row{display:flex; gap:0; flex-wrap:wrap; margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--border);}
+  .kf-chip{background:transparent; padding:0 22px; min-width:auto;}
+  .kf-chip:first-child{padding-left:0;}
+  .kf-chip:not(:last-child){border-right:1px solid var(--border);}
+  .kf-label{font-size:11px; color:var(--text-faint); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;}
+  .kf-value{font-size:17px; font-weight:700; letter-spacing:-0.01em;}
+  .kf-sub{font-size:11.5px; color:var(--text-faint); margin-top:3px;}
+
+  .modal-body{padding:22px 26px; max-height:82vh; overflow-y:auto;}
+  .modal-body.two-col{display:grid; grid-template-columns:1.5fr 1fr; gap:20px; align-items:start;}
+  .two-col-grid{display:grid; grid-template-columns:1.5fr 1fr; gap:20px; align-items:start; margin-bottom:24px;}
+  .address-map-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:20px; align-items:start;}
+  .annahmen-result-layout{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start;}
+
+  .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:13px;}
+  .form-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  .form-grid.cols-1{grid-template-columns:1fr; max-width:420px;}
+
+  .address-suggestions{position:absolute; left:0; right:0; top:100%; z-index:40; background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-top:4px; box-shadow:var(--shadow-md, 0 6px 20px rgba(0,0,0,0.12)); max-height:260px; overflow-y:auto; display:none;}
+  .address-suggestions.open{display:block;}
+  .address-suggestion{padding:9px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #F2F3F6;}
+  .address-suggestion:last-child{border-bottom:none;}
+  .address-suggestion:hover, .address-suggestion.active{background:var(--bg);}
+  .address-suggestion .as-main{font-weight:600;}
+  .address-suggestion .as-sub{font-size:11.5px; color:var(--text-faint);}
+
+  /* ---------------- CALC TABLE (Ansatz / Gesamt) ---------------- */
+  .calc-table{border-radius:10px; overflow:hidden; max-width:640px;}
+  .calc-table-head{display:flex; align-items:center; padding:2px 4px 6px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint); gap:10px;}
+  .calc-table-head .cl-label, .calc-table-head .cl-ansatz, .calc-table-head .cl-gesamt{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);}
+  .calc-table-head .cl-ansatz{display:flex; justify-content:flex-end;}
+  .calc-line{display:flex; align-items:center; padding:3px 4px; gap:10px;}
+  .calc-line.total{font-weight:700; margin-top:4px; padding-top:7px;}
+  .cl-label{flex:1; font-size:13px; min-width:0; color:var(--text-muted);}
+  .calc-line.total .cl-label{color:var(--text);}
+  .cl-ansatz{width:190px; flex-shrink:0; display:grid; grid-template-columns:90px 85px; justify-content:end; align-items:center; column-gap:6px;}
+  .cl-ansatz input{width:85px; border:none; border-radius:4px; padding:3px 5px; text-align:right; font-size:13px; color:var(--text); background:var(--input-fill); transition:background-color .12s ease;}
+  .cl-ansatz input:hover{background:var(--input-fill-hover);}
+  .cl-ansatz input:focus{outline:none; background:var(--input-fill-hover);}
+  .line-input{border:none; border-radius:4px; padding:3px 5px; color:var(--text); background:var(--input-fill); transition:background-color .12s ease;}
+  .line-input:hover{background:var(--input-fill-hover);}
+  .line-input:focus{outline:none; background:var(--input-fill-hover);}
+  .cl-ansatz-static{color:var(--text-faint); font-size:12.5px; text-align:right;}
+  .cl-ansatz .unit{font-size:11px; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right;}
+  .cl-gesamt{width:120px; flex-shrink:0; text-align:right; font-weight:600; font-size:13px;}
+  .field{display:flex; flex-direction:column; gap:3px;}
+  .field label{font-size:12px; font-weight:600; color:#4B5563;}
+  .field label .hint{font-weight:400; color:var(--text-faint); text-transform:none; letter-spacing:0;}
+  .field input, .field select, .field textarea{
+    border:none; border-radius:5px; padding:6px 8px; background:var(--input-fill); color:var(--text);
+    transition:background-color .12s ease;
+  }
+  .field input:hover, .field select:hover, .field textarea:hover{background:var(--input-fill-hover);}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none; background:var(--input-fill-hover);}
+  .field.span-2{grid-column:span 2;}
+  .field.span-3{grid-column:span 3;}
+
+  .type-toggle{display:flex; gap:10px; margin-bottom:18px;}
+  .type-toggle button{
+    flex:1; border:1.5px solid var(--border); background:var(--surface); border-radius:11px; padding:14px; cursor:pointer;
+    text-align:left;
+  }
+  .type-toggle button b{display:block; font-size:14px;}
+  .type-toggle button span{font-size:12px; color:var(--text-muted);}
+  .type-toggle button.selected{border-color:var(--primary); background:var(--primary-soft);}
+
+  .section-title{font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--text); margin:14px 0 8px; padding-bottom:4px; border-bottom:2px solid var(--border);}
+  .section-title:first-child{margin-top:0;}
+
+  .calc-section-card{padding:0; margin-bottom:24px;}
+  .calc-section-card .section-title{margin-top:0;}
+
+  .side-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-bottom:12px; box-shadow:var(--shadow-sm);}
+  .side-card h4{margin:0 0 14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-faint);}
+  .contact-row{display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:13px; border-bottom:1px solid #F5F5F7;}
+  .contact-row:last-of-type{border-bottom:none;}
+  .contact-row .l{color:var(--text-faint);}
+  .contact-row .r{font-weight:600;}
+
+  .calc-result{background:#1D1D1F; color:#fff; border-radius:18px; padding:26px 26px 22px; border:none; box-shadow:0 8px 28px rgba(0,0,0,0.18);}
+  .calc-result .eyebrow{color:#0A84FF;}
+  .result-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0 22px;}
+  .result-stat{background:rgba(255,255,255,0.06); border-radius:12px; padding:14px 12px;}
+  .result-stat .rs-label{font-size:11px; color:rgba(255,255,255,0.55); margin-bottom:6px;}
+  .result-stat .rs-value{font-size:18px; font-weight:700; color:#0A84FF;}
+  .result-stat.negative .rs-value{color:#FF6961;}
+  .result-group-label{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(255,255,255,0.4); margin:0 0 6px;}
+  .result-row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:13px;}
+  .result-row:last-child{border-bottom:none;}
+  .result-row.total{font-weight:700; font-size:14.5px; padding-top:14px;}
+  .result-row.highlight .v{color:#0A84FF; font-weight:700; font-size:16px;}
+  .result-row.negative .v{color:#FF6961;}
+
+  .eyebrow{font-size:11px; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--primary); margin:0 0 6px 0;}
+
+  #map{height:min(78vh, 820px); min-height:520px; border-radius:var(--radius); border:1px solid var(--border);}
+  #map.map-compact{height:440px; min-height:360px;}
+  .map-compact-grid{display:grid; grid-template-columns:1fr 1.6fr; gap:16px; align-items:start;}
+  .map-compact-side{display:flex; flex-direction:column; gap:16px;}
+  .marker-icon-cancelled{ filter: hue-rotate(150deg) saturate(1.6); }
+  .map-tools{display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;}
+  .map-info-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:16px;}
+
+  .task-row, .doc-row{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #F2F3F6;}
+  .task-row:last-child, .doc-row:last-child{border-bottom:none;}
+  .task-row .tcheck{width:17px; height:17px; flex-shrink:0; accent-color:var(--primary);}
+  .task-row .ttext{flex:1;}
+  .task-row .ttext .tt-main{font-size:13.5px;}
+  .task-row.done .tt-main{text-decoration:line-through; color:var(--text-faint);}
+  .task-row .ttext .tt-meta{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .task-row .tampel{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+
+  .add-row{display:flex; gap:8px; margin-top:14px; flex-wrap:wrap;}
+  .add-row input, .add-row select{flex:1; min-width:120px; border:none; border-radius:5px; padding:6px 8px; background:var(--input-fill); color:var(--text); transition:background-color .12s ease;}
+  .add-row input:hover, .add-row select:hover{background:var(--input-fill-hover);}
+  .add-row input:focus, .add-row select:focus{outline:none; background:var(--input-fill-hover);}
+
+  .doc-row .doc-name{font-weight:600; font-size:13.5px;}
+  .doc-row .doc-note{font-size:12px; color:var(--text-faint);}
+  .doc-row a{color:var(--primary); font-size:12.5px; text-decoration:none;}
+  .doc-row a:hover{text-decoration:underline;}
+
+  .footer-actions{display:flex; justify-content:space-between; padding:15px 26px; border-top:1px solid var(--border); background:var(--surface);}
+
+  /* ---------------- CONTACTS ---------------- */
+  .linked-obj-chip{display:inline-flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:3px 10px; font-size:12px; margin:2px 4px 2px 0; cursor:pointer;}
+  .linked-obj-chip:hover{border-color:var(--primary); color:var(--primary);}
+
+  @media (max-width: 900px){
+    #app{grid-template-columns:1fr;}
+    .sidebar{flex-direction:row; overflow-x:auto;}
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .form-grid, .form-grid.cols-3{grid-template-columns:1fr;}
+    .map-info-grid, .map-compact-grid, .modal-body.two-col, .two-col-grid, .annahmen-result-layout, .address-map-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg class="logo-mark" viewBox="0 0 40 22" width="34" height="19">
+        <path d="M2 20 V2 L11 13 L20 2 V20" stroke="#B9B9C2" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="25" y1="4" x2="38" y2="4" stroke="#B9B9C2" stroke-width="2" stroke-linecap="round"/>
+        <line x1="25" y1="11" x2="38" y2="11" stroke="#B9B9C2" stroke-width="2" stroke-linecap="round"/>
+        <line x1="25" y1="18" x2="38" y2="18" stroke="#B9B9C2" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div class="sidebar-logo-word"><b>MEREA</b><span>GROUP</span></div>
+    </div>
+    <div class="sidebar-eyebrow">Ankauf-Pipeline</div>
+
+    <div class="nav" id="nav">
+      <button class="nav-item" data-view="dashboard">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="pipeline">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.2"/><rect x="9.5" y="4" width="5" height="10" rx="1.2"/><rect x="16" y="4" width="5" height="13" rx="1.2"/></svg>
+        Pipeline
+        <span class="count" id="countPipeline"></span>
+      </button>
+      <button class="nav-item" data-view="kontakte">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 19c.7-3.4 3.3-5.5 6.5-5.5s5.8 2.1 6.5 5.5"/><circle cx="17" cy="8.5" r="2.4"/><path d="M16 13.7c2.6.3 4.6 2.2 5.1 4.8"/></svg>
+        Kontakte
+        <span class="count" id="countKontakte"></span>
+      </button>
+      <button class="nav-item" data-view="karte">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3Z"/><path d="M9 3v15M15 6v15"/></svg>
+        Karte
+      </button>
+      <button class="nav-item" data-view="aufgaben">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Aufgaben
+        <span class="count" id="countAufgaben"></span>
+      </button>
+    </div>
+
+    <button class="btn-new" id="btnNew"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Neues Angebot</button>
+
+    <div class="sidebar-section" id="recentSection">
+      <div class="sidebar-section-title">Zuletzt angesehen</div>
+      <div id="recentList"></div>
+    </div>
+
+    <div class="excel-box" id="excelBox">
+      <div class="excel-box-title">Excel</div>
+      <div class="excel-box-status" id="excelStatus">Keine Datei verknüpft</div>
+      <div class="excel-box-actions" id="excelActions"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <p>Daten liegen lokal in diesem Browser. Zum Teilen mit Kolleg:innen: Excel-Datei oben verknüpfen.</p>
+    </div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div id="modalRoot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ==================== STORAGE ==================== */
+const STORE_PREFIX = 'object:';
+const CONTACT_PREFIX = 'contact:';
+
+
+/* Persistenz: localStorage im Browser (funktioniert offline, ohne Backend).
+   Zusätzlich wird bei jeder Änderung automatisch die verknüpfte Excel-Datei
+   aktualisiert (siehe scheduleExcelSync/excelWriteToHandle) – so bleibt eine
+   für Kolleg:innen lesbare, portable Kopie der Daten erhalten. */
+async function storageList(prefix){
+  const items = [];
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    if(!key || !key.startsWith(prefix)) continue;
+    try{ const raw = localStorage.getItem(key); if(raw) items.push(JSON.parse(raw)); }
+    catch(e){ console.error('storageList: Eintrag beschädigt', key, e); }
+  }
+  return items;
+}
+async function storageSave(prefix, item){
+  try{
+    localStorage.setItem(prefix + item.id, JSON.stringify(item));
+    scheduleExcelSync();
+    return true;
+  }catch(e){
+    console.error('storageSave failed', e);
+    alert('Speichern ist fehlgeschlagen (lokaler Speicher voll oder vom Browser blockiert).');
+  }
+}
+async function storageDelete(prefix, id){
+  try{ localStorage.removeItem(prefix + id); scheduleExcelSync(); }
+  catch(e){ console.error('storageDelete failed', e); }
+}
+
+/* ==================== STATE ==================== */
+const STATE = {
+  objects: [],
+  contacts: [],
+  view: 'dashboard',
+  loading: true,
+  filters: { search:'', type:'all', phases:[], sort:'updated_desc' },
+  recentlyViewed: [],
+  selectedRows: [],
+  dashboardMetric: 'count',
+  dashboardPeriod: 'month',
+  pipelineMode: 'kanban',
+  taskFilters: { search:'', status:'all', responsible:'all', category:'all' },
+};
+
+const PHASES = [
+  {key:'neu', label:'Neues Angebot'},
+  {key:'pruefung', label:'Prüfung'},
+  {key:'kalkulation', label:'Kalkulation'},
+  {key:'loi', label:'LOI'},
+  {key:'dd', label:'Due Diligence'},
+  {key:'notar', label:'Notar'},
+];
+const PHASE_ABSAGE = {key:'abgesagt', label:'Absagen'};
+const ALL_PHASES = [...PHASES, PHASE_ABSAGE];
+function phaseLabel(key){ const p = ALL_PHASES.find(p=>p.key===key); return p ? p.label : key; }
+
+/* ==================== UTIL ==================== */
+function uid(){ return 'o_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+function cid(){ return 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+function taskId(){ return 't_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6); }
+function docId(){ return 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6); }
+function bnkId(){ return 'b_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6); }
+
+function fmtMoney(n){
+  if(n===null || n===undefined || isNaN(n)) return '–';
+  return new Intl.NumberFormat('de-DE', {style:'currency', currency:'EUR', maximumFractionDigits:0}).format(n);
+}
+function fmtNum(n, digits){
+  if(n===null || n===undefined || isNaN(n)) return '–';
+  return new Intl.NumberFormat('de-DE', {maximumFractionDigits: digits ?? 1, minimumFractionDigits:0}).format(n);
+}
+function fmtPct(n){
+  if(n===null || n===undefined || isNaN(n)) return '–';
+  return new Intl.NumberFormat('de-DE', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n) + ' %';
+}
+function formatEditableNumber(num, decimals){
+  decimals = decimals || 0;
+  if(num === null || num === undefined || num === '' || isNaN(num)) return '';
+  return new Intl.NumberFormat('de-DE', {minimumFractionDigits:decimals, maximumFractionDigits:decimals}).format(num);
+}
+function parseEditableNumber(str){
+  if(str == null) return null;
+  const cleaned = String(str).trim().replace(/\./g, '').replace(',', '.');
+  if(cleaned === '' || cleaned === '-') return null;
+  const num = Number(cleaned);
+  return isNaN(num) ? null : num;
+}
+/* Erhaelt die Cursorposition ueber ein Re-Rendering hinweg (gemessen als
+   Abstand vom Stringende) -- ohne das wuerde der Cursor nach jedem
+   Tastendruck an den Anfang springen, weil das Feld komplett neu erzeugt wird. */
+function refocusPreservingCaret(el, distFromEnd){
+  if(!el) return;
+  el.focus();
+  const pos = Math.max(0, el.value.length - distFromEnd);
+  try{ el.setSelectionRange(pos, pos); }catch(e){}
+}
+function fmtDate(d){
+  if(!d) return '–';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('de-DE', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function daysUntil(dateStr){
+  const today = new Date(todayStr()+'T00:00:00');
+  const due = new Date(dateStr+'T00:00:00');
+  return Math.round((due-today)/(1000*60*60*24));
+}
+function taskStatus(task){
+  if(task.done) return 'ok';
+  if(!task.due) return 'none';
+  const d = daysUntil(task.due);
+  if(d < 0) return 'overdue';
+  if(d <= 5) return 'warn';
+  return 'ok';
+}
+function escapeHtml(s){
+  if(s===null||s===undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function iconHome(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>';
+}
+
+/* ==================== REFERENZDATEN: GRUNDERWERBSTEUER ==================== */
+const GRUNDERWERBSTEUER = {
+  'Baden-Württemberg': 5.0, 'Bayern': 3.5, 'Berlin': 6.0, 'Brandenburg': 6.5,
+  'Bremen': 5.0, 'Hamburg': 5.5, 'Hessen': 6.0, 'Mecklenburg-Vorpommern': 6.0,
+  'Niedersachsen': 5.0, 'Nordrhein-Westfalen': 6.5, 'Rheinland-Pfalz': 5.0,
+  'Saarland': 6.5, 'Sachsen': 3.5, 'Sachsen-Anhalt': 5.0, 'Schleswig-Holstein': 6.5, 'Thüringen': 5.0,
+};
+const BUNDESLAENDER = Object.keys(GRUNDERWERBSTEUER);
+
+function newParcel(){
+  return { id: taskId(), wohnflaeche: 130, baukosten_pro_m2: 2800, verkaufspreis_haus: 599000 };
+}
+
+/* ==================== DEFAULT OBJECT ==================== */
+function newObject(type){
+  const base = {
+    id: uid(),
+    title: type === 'pe' ? 'Neue Projektentwicklung' : 'Neues MFH-Objekt',
+    type: type,
+    phase: 'neu',
+    address:'', plz:'', ort:'', bundesland: 'Hessen',
+    gemarkung:'', flur:'', flurstueck:'',
+    planungsrecht:'', baurecht:'', grz:null, gfz:null, bodenrichtwert:null, abriss:'Nein',
+    grundstuecksgroesse: null,
+    wohnflaeche: null,
+    baujahr: null,
+    einheiten: null,
+    kontakt_id: null,
+    quelle:'',
+    notizen:'',
+    absage_grund:'',
+    lat:null, lng:null,
+    polygon:null,
+    polygon_area:null,
+    grundstueck_laenge:null,
+    grundstueck_breite:null,
+    flurstueck_amtlich:null,
+    bodenrichtwert_amtlich:null,
+    grundstueck_teile:null,
+    tasks:[],
+    documents:[],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  if(type === 'pe'){
+    base.grundstuecksgroesse = 999;
+    base.einheiten = 3;
+    base.calc = {
+      kaufpreiswunsch: null,
+      nettokaufpreis: 500000,
+      grunderwerbsteuer_pct: GRUNDERWERBSTEUER['Hessen'],
+      notarkosten_pct: 1.5,
+      maklerkosten_pct: 6,
+      sonstige_erwerbsnebenkosten_pct: 0.5,
+      baunebenkosten_items: [
+        { id: bnkId(), label:'Teilung & Genehmigung', mode:'je_haus', ansatz:5000 },
+        { id: bnkId(), label:'Hausanschlusskosten', mode:'je_haus', ansatz:15000 },
+        { id: bnkId(), label:'Abrisskosten', mode:'pauschal', ansatz:60000 },
+        { id: bnkId(), label:'Sonstiges', mode:'pauschal', ansatz:60000 },
+      ],
+      eigenkapital_pct: 20,
+      laufzeit_monate: 12,
+      zinssatz_pct_pa: 6,
+      bearbeitungsgebuehr_pct: 0,
+      vertriebskosten_pct: 1.5,
+      sonstige_kosten_ertrag_pct: 0,
+      parcels: [newParcel(), newParcel(), newParcel()],
+    };
+  } else {
+    base.calc = null; // Kalkulation für MFH-Aufteilung folgt
+  }
+  return base;
+}
+
+function newContact(){
+  return { id: cid(), name:'', firma:'', rolle:'Eigentümer', telefon:'', email:'', notiz:'', createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+}
+
+/* ==================== CALCULATION ENGINE ==================== */
+/* Projektentwicklung = Grundstücksparzellierung: Ankauf -> Parzellierung -> je Parzelle
+   ein Haus bauen und Haus+Grundstücksanteil verkaufen. */
+/* Migriert ältere/unvollständige calc-Objekte auf das aktuelle Schema, damit
+   bereits gespeicherte Angebote nicht wegen fehlender Felder abstürzen. */
+function ensureCalcShape(obj){
+  if(obj.type !== 'pe') return;
+  if(!obj.calc || typeof obj.calc !== 'object') obj.calc = {};
+  const c = obj.calc;
+  if(c.nettokaufpreis == null) c.nettokaufpreis = c.grundstueckspreis || 500000;
+  if(c.grunderwerbsteuer_pct == null) c.grunderwerbsteuer_pct = GRUNDERWERBSTEUER[obj.bundesland] || 6;
+  if(c.notarkosten_pct == null) c.notarkosten_pct = 1.5;
+  if(c.maklerkosten_pct == null) c.maklerkosten_pct = 6;
+  if(c.sonstige_erwerbsnebenkosten_pct == null) c.sonstige_erwerbsnebenkosten_pct = 0;
+  if(c.kaufpreiswunsch === undefined) c.kaufpreiswunsch = null;
+  if(!Array.isArray(c.baunebenkosten_items) || !c.baunebenkosten_items.length){
+    const migrated = [];
+    if(c.baunebenkosten_gesamt) migrated.push({id:bnkId(), label:'Baunebenkosten', mode:'pauschal', ansatz:c.baunebenkosten_gesamt});
+    if(c.zufahrt_kanal_gesamt) migrated.push({id:bnkId(), label:'Zufahrt + Kanal', mode:'pauschal', ansatz:c.zufahrt_kanal_gesamt});
+    if(c.abrisskosten_gesamt) migrated.push({id:bnkId(), label:'Abrisskosten', mode:'pauschal', ansatz:c.abrisskosten_gesamt});
+    c.baunebenkosten_items = migrated.length ? migrated : [
+      { id: bnkId(), label:'Teilung & Genehmigung', mode:'je_haus', ansatz:5000 },
+      { id: bnkId(), label:'Hausanschlusskosten', mode:'je_haus', ansatz:15000 },
+      { id: bnkId(), label:'Abrisskosten', mode:'pauschal', ansatz:60000 },
+      { id: bnkId(), label:'Sonstiges', mode:'pauschal', ansatz:60000 },
+    ];
+  }
+  c.baunebenkosten_items.forEach(item=>{ if(!item.id) item.id = bnkId(); if(!item.mode) item.mode = 'pauschal'; });
+  delete c.baunebenkosten_gesamt; delete c.zufahrt_kanal_gesamt; delete c.abrisskosten_gesamt;
+  if(c.eigenkapital_pct == null) c.eigenkapital_pct = 20;
+  if(c.laufzeit_monate == null) c.laufzeit_monate = 12;
+  if(c.zinssatz_pct_pa == null) c.zinssatz_pct_pa = 6;
+  if(c.bearbeitungsgebuehr_pct == null) c.bearbeitungsgebuehr_pct = 0;
+  if(c.vertriebskosten_pct == null) c.vertriebskosten_pct = 1.5;
+  if(c.sonstige_kosten_ertrag_pct == null) c.sonstige_kosten_ertrag_pct = 0;
+  if(!Array.isArray(c.parcels) || !c.parcels.length) c.parcels = [newParcel()];
+  c.parcels.forEach(p=>{ if(!p.id) p.id = taskId(); });
+}
+
+function calcPE(obj){
+  ensureCalcShape(obj);
+  const c = obj.calc;
+  const grundstuecksgroesse = obj.grundstuecksgroesse || 0;
+  const parcels = (c.parcels && c.parcels.length) ? c.parcels : [newParcel()];
+  const anzahlParzellen = parcels.length;
+
+  const nettokaufpreis = c.nettokaufpreis || 0;
+  const grest = nettokaufpreis * (c.grunderwerbsteuer_pct||0)/100;
+  const notar = nettokaufpreis * (c.notarkosten_pct||0)/100;
+  const makler = nettokaufpreis * (c.maklerkosten_pct||0)/100;
+  const sonstigeErwerb = nettokaufpreis * (c.sonstige_erwerbsnebenkosten_pct||0)/100;
+  const erwerbsnebenkosten = grest + notar + makler + sonstigeErwerb;
+  const erwerbsnebenkosten_pct = (c.grunderwerbsteuer_pct||0)+(c.notarkosten_pct||0)+(c.maklerkosten_pct||0)+(c.sonstige_erwerbsnebenkosten_pct||0);
+  const bruttokaufpreis = nettokaufpreis + erwerbsnebenkosten;
+  const bruttokaufpreis_je_qm = grundstuecksgroesse > 0 ? bruttokaufpreis/grundstuecksgroesse : null;
+  const bodenrichtwert_je_qm = obj.bodenrichtwert || null;
+  const bodenrichtwert_gesamt = (obj.bodenrichtwert||0) * grundstuecksgroesse;
+  const nettokaufpreis_je_qm = grundstuecksgroesse > 0 ? nettokaufpreis/grundstuecksgroesse : null;
+  const kaufpreiswunsch_gesamt = c.kaufpreiswunsch;
+  const kaufpreiswunsch_je_qm = (c.kaufpreiswunsch!=null && grundstuecksgroesse>0) ? c.kaufpreiswunsch/grundstuecksgroesse : null;
+  const abwWunschAbs = (c.kaufpreiswunsch!=null) ? nettokaufpreis - c.kaufpreiswunsch : null;
+  const abwWunschPct = (c.kaufpreiswunsch) ? (abwWunschAbs/c.kaufpreiswunsch*100) : null;
+  const abwBrwAbs = (obj.bodenrichtwert!=null && bodenrichtwert_gesamt>0) ? nettokaufpreis - bodenrichtwert_gesamt : null;
+  const abwBrwPct = (bodenrichtwert_gesamt>0) ? (abwBrwAbs/bodenrichtwert_gesamt*100) : null;
+
+  const baunebenkostenItems = (c.baunebenkosten_items||[]).map(item=>{
+    const gesamt = item.mode === 'je_haus' ? (item.ansatz||0) * anzahlParzellen : (item.ansatz||0);
+    return {...item, gesamt};
+  });
+  const sonstigeKostenGesamt = baunebenkostenItems.reduce((s,i)=>s+i.gesamt,0);
+
+  const grundstueckJeParzelle = anzahlParzellen>0 ? grundstuecksgroesse/anzahlParzellen : 0;
+  const grundstueckskostenEkJeParzelle = anzahlParzellen>0 ? bruttokaufpreis/anzahlParzellen : 0;
+  const baunebenkostenJeParzelle = anzahlParzellen>0 ? sonstigeKostenGesamt/anzahlParzellen : 0;
+
+  let sumWohnflaeche=0, sumHauskosten=0, sumVerkaufspreisHaus=0, sumGestehungskosten=0,
+      sumDeckungsbeitragGrundstueck=0, sumVerkaufspreisGrundstueck=0, sumGrundstueckQm=0;
+
+  const parzellenErgebnis = parcels.map(p=>{
+    const wohnflaeche = p.wohnflaeche || 0;
+    const baukosten_pro_m2 = p.baukosten_pro_m2 || 0;
+    const hauskosten = wohnflaeche * baukosten_pro_m2;
+    const gestehungskosten = grundstueckskostenEkJeParzelle + hauskosten + baunebenkostenJeParzelle;
+    const verkaufspreis_haus = p.verkaufspreis_haus || 0;
+    const verkaufspreis_haus_je_qm = wohnflaeche > 0 ? verkaufspreis_haus/wohnflaeche : null;
+    const grundstueck_qm = p.grundstueck_qm != null ? p.grundstueck_qm : grundstueckJeParzelle;
+    const verkaufspreis_grundstueck = verkaufspreis_haus - hauskosten - baunebenkostenJeParzelle;
+    const verkaufspreis_grundstueck_je_qm = grundstueck_qm > 0 ? verkaufspreis_grundstueck/grundstueck_qm : null;
+    const deckungsbeitrag_grundstueck = verkaufspreis_haus - gestehungskosten;
+
+    sumWohnflaeche += wohnflaeche; sumHauskosten += hauskosten; sumVerkaufspreisHaus += verkaufspreis_haus;
+    sumGestehungskosten += gestehungskosten; sumDeckungsbeitragGrundstueck += deckungsbeitrag_grundstueck; sumVerkaufspreisGrundstueck += verkaufspreis_grundstueck;
+    sumGrundstueckQm += grundstueck_qm;
+
+    return { id:p.id, wohnflaeche, baukosten_pro_m2, hauskosten, grundstueck_qm,
+      grundstueckskosten_ek:grundstueckskostenEkJeParzelle, gestehungskosten, verkaufspreis_haus, verkaufspreis_haus_je_qm,
+      verkaufspreis_grundstueck, verkaufspreis_grundstueck_je_qm, deckungsbeitrag_grundstueck };
+  });
+
+  const gik = bruttokaufpreis + sonstigeKostenGesamt;
+  const ek_pct = c.eigenkapital_pct != null ? c.eigenkapital_pct : 20;
+  const eigenkapital = gik * ek_pct/100;
+  const fremdkapital = gik - eigenkapital;
+  const laufzeit_monate = c.laufzeit_monate || 0;
+  const zinskosten = (c.zinssatz_pct_pa||0)/100 * fremdkapital/12 * laufzeit_monate;
+  const bearbeitungsgebuehr = (c.bearbeitungsgebuehr_pct||0)/100 * fremdkapital;
+  const finanzierungskosten = zinskosten + bearbeitungsgebuehr;
+  const vertriebskosten = (c.vertriebskosten_pct||0)/100 * sumVerkaufspreisHaus;
+  const sonstigeKostenErtrag = (c.sonstige_kosten_ertrag_pct||0)/100 * sumVerkaufspreisHaus;
+
+  const deckungsbeitrag = sumDeckungsbeitragGrundstueck - finanzierungskosten - vertriebskosten - sonstigeKostenErtrag;
+  const deckungsbeitrag_pct = gik > 0 ? (deckungsbeitrag/gik)*100 : null;
+  const ek_rendite_pct = eigenkapital > 0 ? (deckungsbeitrag/eigenkapital)*100 : null;
+
+  return {
+    gewinn: deckungsbeitrag, marge_pct: deckungsbeitrag_pct, rendite_ek_pct: ek_rendite_pct,
+    gesamtkosten: gik, verkaufserloes: sumVerkaufspreisHaus,
+    nettokaufpreis, grest, notar, makler, sonstigeErwerb, erwerbsnebenkosten, erwerbsnebenkosten_pct, bruttokaufpreis, bruttokaufpreis_je_qm,
+    bodenrichtwert_gesamt, bodenrichtwert_je_qm, nettokaufpreis_je_qm,
+    kaufpreiswunsch_gesamt, kaufpreiswunsch_je_qm, abwWunschAbs, abwWunschPct, abwBrwAbs, abwBrwPct,
+    baunebenkostenItems, sonstigeKostenGesamt,
+    anzahlParzellen, grundstueckJeParzelle, grundstueckskostenEkJeParzelle,
+    sumWohnflaeche, sumHauskosten, sumGestehungskosten, sumVerkaufspreisGrundstueck,
+    sumDeckungsbeitragGrundstueck, sumGrundstueckQm, parzellenErgebnis,
+    gik, eigenkapital, fremdkapital, zinskosten, bearbeitungsgebuehr, finanzierungskosten,
+    vertriebskosten, sonstigeKostenErtrag, deckungsbeitrag, deckungsbeitrag_pct, ek_rendite_pct,
+  };
+}
+
+/* MFH-Aufteilung: Kalkulation folgt noch – bewusst deaktiviert. */
+function calcStub(){
+  return { gewinn:null, marge_pct:null, rendite_ek_pct:null, gesamtkosten:null, verkaufserloes:null };
+}
+
+function getCalcResult(obj){ return obj.type === 'pe' ? calcPE(obj) : calcStub(); }
+function objVolume(obj){
+  if(obj.type !== 'pe') return 0;
+  const r = getCalcResult(obj);
+  return r.gik||0;
+}
+function objAreaLabel(obj){
+  if(obj.type === 'pe') return obj.grundstuecksgroesse ? fmtNum(obj.grundstuecksgroesse,0)+' m²' : '–';
+  return obj.wohnflaeche ? fmtNum(obj.wohnflaeche,0)+' m²' : '–';
+}
+function getContact(id){ return STATE.contacts.find(c=>c.id===id); }
+
+/* ==================== FILTERING ==================== */
+function matchesSearch(obj, q){
+  if(!q) return true;
+  const hay = [obj.title, obj.address, obj.ort, obj.plz, obj.gemarkung].filter(Boolean).join(' ').toLowerCase();
+  return hay.includes(q.toLowerCase());
+}
+function baseFilteredObjects(){
+  const f = STATE.filters;
+  return STATE.objects.filter(o=>{
+    if(f.type !== 'all' && o.type !== f.type) return false;
+    if(!matchesSearch(o, f.search)) return false;
+    return true;
+  });
+}
+function dealsFilteredObjects(){
+  const f = STATE.filters;
+  let list = baseFilteredObjects();
+  if(f.phases && f.phases.length){ list = list.filter(o=>f.phases.includes(o.phase)); }
+  const sortFns = {
+    updated_desc: (a,b)=> (b.updatedAt||'').localeCompare(a.updatedAt||''),
+    price_desc: (a,b)=> objVolume(b)-objVolume(a),
+    price_asc: (a,b)=> objVolume(a)-objVolume(b),
+    title_asc: (a,b)=> (a.title||'').localeCompare(b.title||''),
+  };
+  list = [...list].sort(sortFns[f.sort] || sortFns.updated_desc);
+  return list;
+}
+
+/* ==================== RENDER ROOT ==================== */
+function renderApp(){
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    el.classList.toggle('active', el.dataset.view === STATE.view);
+  });
+  document.getElementById('countPipeline').textContent = STATE.objects.filter(o=>o.phase!=='abgesagt').length || '';
+  document.getElementById('countKontakte').textContent = STATE.contacts.length || '';
+  { let openTasks=0; STATE.objects.forEach(o=>(o.tasks||[]).forEach(t=>{ if(!t.done) openTasks++; })); document.getElementById('countAufgaben').textContent = openTasks || ''; }
+  renderRecentSidebar();
+  renderNotifBadge();
+
+  const main = document.getElementById('main');
+  if(STATE.loading){ main.innerHTML = '<div class="empty-state">Lade Pipeline …</div>'; return; }
+  if(KARTE_VIEW.map && !(STATE.view==='karte' && !MODAL.objectId)){ KARTE_VIEW.map.remove(); KARTE_VIEW.map = null; }
+  if(MODAL.objectId){ renderObjectPage(main); return; }
+  if(STATE.view === 'dashboard') renderDashboard(main);
+  else if(STATE.view === 'pipeline') renderPipelineView(main);
+  else if(STATE.view === 'kontakte') renderKontakteView(main);
+  else if(STATE.view === 'karte') renderKarteView(main);
+  else if(STATE.view === 'aufgaben') renderAufgabenOverview(main);
+}
+
+function renderRecentSidebar(){
+  const list = document.getElementById('recentList');
+  const section = document.getElementById('recentSection');
+  if(!list) return;
+  const items = STATE.recentlyViewed.map(id=>getObj(id)).filter(Boolean).slice(0,8);
+  if(!items.length){ section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = items.map(o=>`
+    <div class="recent-item" data-recent-id="${o.id}">
+      <span class="ri-icon">${iconHome()}</span>
+      <span class="ri-label">${escapeHtml(o.title)}</span>
+    </div>`).join('');
+  list.querySelectorAll('[data-recent-id]').forEach(el=>{
+    el.addEventListener('click', ()=>openObjectModal(el.dataset.recentId));
+  });
+}
+function pushRecentlyViewed(id){
+  STATE.recentlyViewed = [id, ...STATE.recentlyViewed.filter(x=>x!==id)].slice(0,8);
+  renderRecentSidebar();
+}
+function renderNotifBadge(){
+  const badge = document.getElementById('notifBadge');
+  if(!badge) return;
+  let count = 0;
+  STATE.objects.forEach(o=>(o.tasks||[]).forEach(t=>{ if(taskStatus(t)==='overdue') count++; }));
+  if(count > 0){ badge.style.display=''; badge.textContent = count; }
+  else{ badge.style.display='none'; }
+}
+
+/* ==================== DASHBOARD ==================== */
+function periodBuckets(granularity, count){
+  const buckets = [];
+  const now = new Date();
+  if(granularity === 'week'){
+    const day = (now.getDay()+6)%7; // 0=Mo
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    monday.setDate(monday.getDate()-day);
+    for(let i=count-1;i>=0;i--){
+      const start = new Date(monday); start.setDate(monday.getDate()-7*i);
+      const end = new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
+      const label = `${String(start.getDate()).padStart(2,'0')}.${String(start.getMonth()+1).padStart(2,'0')}.`;
+      buckets.push({start, end, label});
+    }
+  } else {
+    for(let i=count-1;i>=0;i--){
+      const start = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const end = new Date(now.getFullYear(), now.getMonth()-i+1, 0, 23,59,59,999);
+      const label = start.toLocaleDateString('de-DE', {month:'short', year:'2-digit'});
+      buckets.push({start, end, label});
+    }
+  }
+  return buckets;
+}
+function countInBucket(objs, bucket){
+  return objs.filter(o=>{
+    const c = new Date(o.createdAt);
+    return c >= bucket.start && c <= bucket.end;
+  }).length;
+}
+
+function renderDashboard(main){
+  const typeFilter = STATE.filters.type;
+  const byType = (list)=> typeFilter === 'all' ? list : list.filter(o=>o.type===typeFilter);
+
+  const objs = byType(STATE.objects.filter(o=>o.phase !== 'abgesagt'));
+  const totalVolume = objs.reduce((s,o)=>s+objVolume(o),0);
+  const margins = objs.map(o=>getCalcResult(o).marge_pct).filter(v=>v!=null && isFinite(v));
+  const avgMargin = margins.length ? margins.reduce((a,b)=>a+b,0)/margins.length : null;
+
+  let overdue = [];
+  STATE.objects.forEach(o=>{ (o.tasks||[]).forEach(t=>{ if(taskStatus(t)==='overdue') overdue.push({obj:o, task:t}); }); });
+  overdue = overdue.filter(x => typeFilter==='all' || x.obj.type===typeFilter);
+  overdue.sort((a,b)=> (a.task.due||'').localeCompare(b.task.due||''));
+
+  const phaseRows = PHASES.map(p=>{
+    const inPhase = objs.filter(o=>o.phase===p.key);
+    const vol = inPhase.reduce((s,o)=>s+objVolume(o),0);
+    return {label:p.label, count:inPhase.length, vol};
+  });
+  const maxVol = Math.max(1, ...phaseRows.map(r=>r.vol));
+
+  // Cancelled deals grouped by reason
+  const cancelled = byType(STATE.objects.filter(o=>o.phase==='abgesagt'));
+  const reasonMap = {};
+  cancelled.forEach(o=>{
+    const reason = (o.absage_grund||'').trim() || 'Kein Grund angegeben';
+    reasonMap[reason] = (reasonMap[reason]||0) + 1;
+  });
+  const reasonRows = Object.entries(reasonMap).map(([reason,count])=>({reason,count})).sort((a,b)=>b.count-a.count);
+  const maxReasonCount = Math.max(1, ...reasonRows.map(r=>r.count));
+
+  // Neue Deals über Zeit (Woche/Monat)
+  const period = STATE.dashboardPeriod || 'month';
+  const bucketCount = period === 'week' ? 8 : 6;
+  const buckets = periodBuckets(period, bucketCount);
+  const typedAll = byType(STATE.objects);
+  const bucketCounts = buckets.map(b=>countInBucket(typedAll, b));
+  const maxBucket = Math.max(1, ...bucketCounts);
+
+  main.innerHTML = `
+    <div class="view-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="sub">Gesamte Angebots-Pipeline auf einen Blick.</p>
+      </div>
+    </div>
+
+    <div class="chip-row" id="dashTypeFilter" style="margin-bottom:20px;">
+      <button class="chip ${typeFilter==='all'?'active':''}" data-type="all">Alle</button>
+      <button class="chip ${typeFilter==='pe'?'active':''}" data-type="pe">Grundstücke</button>
+      <button class="chip ${typeFilter==='mfh'?'active':''}" data-type="mfh">Mehrfamilienhäuser</button>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-label">Investitionsvolumen Pipeline</div><div class="kpi-value">${fmtMoney(totalVolume)}</div><div class="kpi-sub">über ${objs.length} aktive Angebote</div></div>
+      <div class="kpi-card"><div class="kpi-label">Angebote je Phase</div><div class="kpi-value">${objs.length}</div><div class="kpi-sub">${PHASES.map(p=>`${p.label.split(' ')[0]}: ${objs.filter(o=>o.phase===p.key).length}`).join(' · ')}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Ø erwartete Marge</div><div class="kpi-value">${avgMargin!=null ? fmtPct(avgMargin) : '–'}</div><div class="kpi-sub">auf Basis aktueller Kalkulationen</div></div>
+      <div class="kpi-card"><div class="kpi-label">Überfällige Aufgaben</div><div class="kpi-value ${overdue.length?'danger':''}">${overdue.length}</div><div class="kpi-sub">objektübergreifend</div></div>
+    </div>
+
+    <div class="panel funnel-panel" id="funnelPanel"></div>
+
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <h3 style="margin:0;">Neue Deals</h3>
+        <div class="metric-toggle" id="periodToggle">
+          <button class="metric-btn ${period==='week'?'active':''}" data-period="week">Woche</button>
+          <button class="metric-btn ${period==='month'?'active':''}" data-period="month">Monat</button>
+        </div>
+      </div>
+      <div class="funnel-chart" style="height:160px;">
+        ${buckets.map((b,i)=>{
+          const val = bucketCounts[i];
+          const heightPct = maxBucket>0 ? Math.max(2, val/maxBucket*100) : 2;
+          return `
+          <div class="funnel-col" style="min-width:56px;">
+            <div class="funnel-value">${val}</div>
+            <div class="funnel-bar" style="height:${heightPct}%; background:var(--primary);"></div>
+            <div class="funnel-label">${b.label}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Pipeline nach Phase</h3>
+      ${phaseRows.map(r=>`
+        <div class="bar-row">
+          <div class="label">${r.label}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(r.vol/maxVol*100).toFixed(1)}%"></div></div>
+          <div class="count">${r.count} · ${fmtMoney(r.vol)}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="panel">
+      <h3>Abgesagte Deals nach Absagegrund</h3>
+      ${reasonRows.length ? reasonRows.map(r=>`
+        <div class="bar-row">
+          <div class="label" title="${escapeHtml(r.reason)}">${escapeHtml(r.reason)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(r.count/maxReasonCount*100).toFixed(1)}%; background:var(--danger);"></div></div>
+          <div class="count">${r.count} Deal${r.count===1?'':'s'}</div>
+        </div>`).join('') : '<div class="empty-state">Noch keine abgesagten Deals.</div>'}
+    </div>
+
+    <div class="panel">
+      <h3>Überfällige Aufgaben</h3>
+      ${overdue.length ? overdue.map(({obj,task})=>`
+        <div class="task-alert-row">
+          <div class="ttitle"><b data-open-obj="${obj.id}">${escapeHtml(obj.title)}</b> — ${escapeHtml(task.text)}</div>
+          <div class="tdue">fällig ${fmtDate(task.due)}</div>
+        </div>`).join('') : '<div class="empty-state">Keine überfälligen Aufgaben. Alles im Zeitplan.</div>'}
+    </div>
+  `;
+  main.querySelectorAll('[data-open-obj]').forEach(el=>{
+    el.addEventListener('click', ()=>openObjectModal(el.dataset.openObj));
+  });
+  document.getElementById('dashTypeFilter').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    STATE.filters.type = btn.dataset.type;
+    renderDashboard(main);
+  });
+  document.getElementById('periodToggle').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.metric-btn');
+    if(!btn) return;
+    STATE.dashboardPeriod = btn.dataset.period;
+    renderDashboard(main);
+  });
+  renderFunnelChart(document.getElementById('funnelPanel'));
+}
+
+/* ---------------- FUNNEL / KONVERSIONS-CHART ---------------- */
+function renderFunnelChart(container){
+  const metric = STATE.dashboardMetric;
+  const typeFilter = STATE.filters.type;
+  const typedObjects = typeFilter==='all' ? STATE.objects : STATE.objects.filter(o=>o.type===typeFilter);
+  const stages = [...PHASES, PHASE_ABSAGE]; // neu..notar, abgesagt
+  const valueFor = (phaseKey)=>{
+    const inPhase = typedObjects.filter(o=>o.phase===phaseKey);
+    return metric === 'volume' ? inPhase.reduce((s,o)=>s+objVolume(o),0) : inPhase.length;
+  };
+  const bars = stages.map(p=>({ key:p.key, label:p.label, value: valueFor(p.key) }));
+  const maxVal = Math.max(1, ...bars.map(b=>b.value));
+
+  const countNotar = typedObjects.filter(o=>o.phase==='notar').length;
+  const countAbgesagt = typedObjects.filter(o=>o.phase==='abgesagt').length;
+  const volNotar = typedObjects.filter(o=>o.phase==='notar').reduce((s,o)=>s+objVolume(o),0);
+  const volAbgesagt = typedObjects.filter(o=>o.phase==='abgesagt').reduce((s,o)=>s+objVolume(o),0);
+  let winRate = null;
+  if(metric === 'volume'){
+    const denom = volNotar + volAbgesagt;
+    winRate = denom > 0 ? (volNotar/denom*100) : 0;
+  } else {
+    const denom = countNotar + countAbgesagt;
+    winRate = denom > 0 ? (countNotar/denom*100) : 0;
+  }
+
+  const fmtVal = (v)=> metric === 'volume' ? fmtMoney(v) : fmtNum(v,0);
+
+  container.innerHTML = `
+    <div class="funnel-top">
+      <div class="funnel-title"><span class="funnel-icon">📊</span> Konversion — Pipeline</div>
+      <div class="funnel-sub">${STATE.filters.type==='all' ? 'ALLE TYPEN' : (STATE.filters.type==='pe'?'PROJEKTENTWICKLUNG':'MFH-AUFTEILUNG')} · GESAMT</div>
+    </div>
+    <div class="funnel-headline">Gewinnquote liegt bei ${fmtNum(winRate,0)}%</div>
+    <div class="metric-toggle" id="metricToggle">
+      <button class="metric-btn ${metric==='count'?'active':''}" data-metric="count">Anzahl Deals</button>
+      <button class="metric-btn ${metric==='volume'?'active':''}" data-metric="volume">Ankaufsvolumen</button>
+    </div>
+    <div class="funnel-chart">
+      ${bars.map((b,i)=>{
+        const heightPct = maxVal>0 ? Math.max(2, b.value/maxVal*100) : 2;
+        const isWon = b.key === 'notar';
+        const isCancelled = b.key === 'abgesagt';
+        const barColor = isWon ? 'var(--ok)' : (isCancelled ? '#D9D9DE' : '#F4C74A');
+        let arrowHtml = '';
+        if(i < bars.length-1){
+          const next = bars[i+1];
+          const pct = b.value>0 ? Math.round(next.value/b.value*100) : 0;
+          arrowHtml = `<div class="funnel-arrow">${pct}%</div>`;
+        }
+        return `
+          <div class="funnel-col">
+            <div class="funnel-value">${fmtVal(b.value)}</div>
+            <div class="funnel-bar" style="height:${heightPct}%; background:${barColor};"></div>
+            <div class="funnel-label">${b.label}</div>
+          </div>
+          ${arrowHtml}
+        `;
+      }).join('')}
+    </div>
+    <div class="funnel-legend">
+      <span class="legend-dot" style="background:#F4C74A;"></span> Erreichte Phase
+      <span class="legend-dot" style="background:var(--ok); margin-left:16px;"></span> Gewonnen
+      <span class="legend-dot" style="background:#D9D9DE; margin-left:16px;"></span> Abgesagt
+    </div>
+  `;
+  document.getElementById('metricToggle').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.metric-btn');
+    if(!btn) return;
+    STATE.dashboardMetric = btn.dataset.metric;
+    renderFunnelChart(container);
+  });
+}
+
+/* ==================== SHARED TOOLBAR ==================== */
+function renderToolbar(opts){
+  const f = STATE.filters;
+  const phaseFilterCount = f.phases.length;
+  const mode = STATE.pipelineMode || 'kanban';
+  return `
+    <div class="toolbar">
+      ${opts.showModeToggle ? `
+      <div class="view-toggle" id="pipelineModeToggle">
+        <button class="${mode==='kanban'?'active':''}" data-mode="kanban">
+          <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>
+          Kanban
+        </button>
+        <button class="${mode==='list'?'active':''}" data-mode="list">
+          <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Liste
+        </button>
+      </div>` : ''}
+      <div class="search-box">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" placeholder="Objekt suchen…" value="${escapeHtml(f.search)}" />
+      </div>
+      <div class="chip-row">
+        <button class="chip ${f.type==='all'?'active':''}" data-type="all">Alle</button>
+        <button class="chip ${f.type==='pe'?'active':''}" data-type="pe">Projektentwicklung</button>
+        <button class="chip ${f.type==='mfh'?'active':''}" data-type="mfh">MFH-Aufteilung</button>
+      </div>
+      ${opts.showPhaseFilter ? `
+      <div style="position:relative;">
+        <button class="tb-btn ${phaseFilterCount?'active-filter':''}" id="phaseFilterBtn">
+          <svg viewBox="0 0 24 24"><path d="M4 6h16l-6 7v5l-4 2v-7z"/></svg>
+          Status ${phaseFilterCount ? `<span class="tb-badge">${phaseFilterCount}</span>` : ''}
+        </button>
+        <div class="dropdown-panel" id="phaseFilterPanel" style="display:none;">
+          ${ALL_PHASES.map(p=>`<label><input type="checkbox" value="${p.key}" ${f.phases.includes(p.key)?'checked':''} data-phase-check /> ${p.label}</label>`).join('')}
+        </div>
+      </div>` : ''}
+      ${opts.showSort ? `
+      <div style="position:relative;">
+        <button class="tb-btn" id="sortBtn"><svg viewBox="0 0 24 24"><path d="M7 6h13M7 12h9M7 18h5"/><path d="m3 6 0 .01M3 12l0 .01M3 18l0 .01"/></svg>Sortieren</button>
+        <div class="dropdown-panel" id="sortPanel" style="display:none;">
+          <label><input type="radio" name="sort" value="updated_desc" ${f.sort==='updated_desc'?'checked':''} data-sort-radio /> Zuletzt aktualisiert</label>
+          <label><input type="radio" name="sort" value="price_desc" ${f.sort==='price_desc'?'checked':''} data-sort-radio /> Preis (absteigend)</label>
+          <label><input type="radio" name="sort" value="price_asc" ${f.sort==='price_asc'?'checked':''} data-sort-radio /> Preis (aufsteigend)</label>
+          <label><input type="radio" name="sort" value="title_asc" ${f.sort==='title_asc'?'checked':''} data-sort-radio /> Titel (A–Z)</label>
+        </div>
+      </div>` : ''}
+    </div>
+  `;
+}
+function wireToolbar(rerender){
+  const modeToggle = document.getElementById('pipelineModeToggle');
+  if(modeToggle) modeToggle.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    STATE.pipelineMode = btn.dataset.mode;
+    rerender();
+  });
+  const searchInput = document.getElementById('searchInput');
+  if(searchInput) searchInput.addEventListener('input', (e)=>{ STATE.filters.search = e.target.value; rerender(); });
+  document.querySelectorAll('.chip-row .chip').forEach(el=>{
+    el.addEventListener('click', ()=>{ STATE.filters.type = el.dataset.type; rerender(); });
+  });
+  const phaseBtn = document.getElementById('phaseFilterBtn');
+  const phasePanel = document.getElementById('phaseFilterPanel');
+  if(phaseBtn){
+    phaseBtn.addEventListener('click', (e)=>{ e.stopPropagation(); phasePanel.style.display = phasePanel.style.display==='none'?'block':'none'; });
+    phasePanel.querySelectorAll('[data-phase-check]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const val = cb.value;
+        if(cb.checked){ if(!STATE.filters.phases.includes(val)) STATE.filters.phases.push(val); }
+        else{ STATE.filters.phases = STATE.filters.phases.filter(p=>p!==val); }
+        rerender();
+      });
+    });
+  }
+  const sortBtn = document.getElementById('sortBtn');
+  const sortPanel = document.getElementById('sortPanel');
+  if(sortBtn){
+    sortBtn.addEventListener('click', (e)=>{ e.stopPropagation(); sortPanel.style.display = sortPanel.style.display==='none'?'block':'none'; });
+    sortPanel.querySelectorAll('[data-sort-radio]').forEach(rb=>{
+      rb.addEventListener('change', ()=>{ STATE.filters.sort = rb.value; rerender(); });
+    });
+  }
+  document.addEventListener('click', ()=>{
+    if(phasePanel) phasePanel.style.display='none';
+    if(sortPanel) sortPanel.style.display='none';
+  }, {once:true});
+}
+
+/* ==================== PIPELINE (LISTE + KANBAN, UMSCHALTBAR) ==================== */
+function renderPipelineView(main){
+  const mode = STATE.pipelineMode || 'kanban';
+  if(mode === 'list') renderPipelineListMode(main);
+  else renderPipelineKanbanMode(main);
+}
+
+function renderPipelineListMode(main){
+  const list = dealsFilteredObjects();
+  const selected = STATE.selectedRows;
+  main.innerHTML = `
+    <div class="view-header">
+      <div><h1>Pipeline</h1><p class="sub">Alle Angebote als sortierbare Liste – Klick öffnet das Objekt.</p></div>
+    </div>
+    ${renderToolbar({showPhaseFilter:true, showSort:true, showModeToggle:true})}
+    ${selected.length ? `
+    <div class="bulk-bar">
+      <span>${selected.length} ausgewählt</span>
+      <button id="bulkDeleteBtn">Löschen</button>
+      <button id="bulkClearBtn">Auswahl aufheben</button>
+    </div>` : ''}
+    <div class="table-wrap">
+      <table class="deals">
+        <thead>
+          <tr>
+            <th class="chk-col"><input type="checkbox" id="selectAllChk" ${list.length && selected.length===list.length?'checked':''} /></th>
+            <th>Status</th><th></th><th>Name</th><th>Typ</th><th>Preis</th><th>Fläche</th><th>Ort</th><th>Straße</th><th>Absagegrund</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.length ? list.map(o=>{
+            const phaseCls = 'pill-'+o.phase;
+            const checked = selected.includes(o.id);
+            return `
+            <tr data-row-id="${o.id}">
+              <td class="chk-col"><input type="checkbox" data-row-chk="${o.id}" ${checked?'checked':''} /></td>
+              <td><span class="pill ${phaseCls}">${phaseLabel(o.phase)}</span></td>
+              <td><div class="thumb">${iconHome()}</div></td>
+              <td>
+                <div class="cell-name">${escapeHtml(o.title)}</div>
+                <div class="cell-sub">${o.gemarkung?`Gemarkung ${escapeHtml(o.gemarkung)}`:''}</div>
+              </td>
+              <td><span class="type-badge ${o.type}">${o.type==='pe'?'PE':'MFH'}</span></td>
+              <td class="tnum">${fmtMoney(objVolume(o))}</td>
+              <td class="tnum">${objAreaLabel(o)}</td>
+              <td>${escapeHtml(o.ort)||'–'}</td>
+              <td>${escapeHtml(o.address)||'–'}</td>
+              <td>${o.phase==='abgesagt' ? (escapeHtml(o.absage_grund)||'–') : '–'}</td>
+              <td class="row-actions">
+                <button class="row-more-btn" data-row-more="${o.id}">⋯</button>
+              </td>
+            </tr>`;
+          }).join('') : `<tr><td colspan="10"><div class="empty-state">Keine Angebote gefunden.</div></td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+  wireToolbar(()=>renderPipelineView(main));
+
+  main.querySelectorAll('tbody tr[data-row-id]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-row-chk]') || e.target.closest('.row-actions')) return;
+      openObjectModal(el.dataset.rowId);
+    });
+  });
+  main.querySelectorAll('[data-row-chk]').forEach(el=>{
+    el.addEventListener('click', (e)=>e.stopPropagation());
+    el.addEventListener('change', ()=>{
+      const id = el.dataset.rowChk;
+      if(el.checked){ if(!STATE.selectedRows.includes(id)) STATE.selectedRows.push(id); }
+      else{ STATE.selectedRows = STATE.selectedRows.filter(x=>x!==id); }
+      renderPipelineView(main);
+    });
+  });
+  const selectAll = document.getElementById('selectAllChk');
+  if(selectAll) selectAll.addEventListener('change', ()=>{
+    STATE.selectedRows = selectAll.checked ? list.map(o=>o.id) : [];
+    renderPipelineView(main);
+  });
+  main.querySelectorAll('[data-row-more]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      document.querySelectorAll('.row-menu').forEach(m=>m.remove());
+      const id = el.dataset.rowMore;
+      const menu = document.createElement('div');
+      menu.className = 'row-menu';
+      menu.innerHTML = `<button data-menu-open>Öffnen</button><button data-menu-delete class="danger">Löschen</button>`;
+      el.parentElement.appendChild(menu);
+      menu.querySelector('[data-menu-open]').addEventListener('click', (ev)=>{ ev.stopPropagation(); openObjectModal(id); });
+      menu.querySelector('[data-menu-delete]').addEventListener('click', async (ev)=>{
+        ev.stopPropagation();
+        const obj = getObj(id);
+        if(obj && confirm(`"${obj.title}" wirklich unwiderruflich löschen?`)){
+          STATE.objects = STATE.objects.filter(o=>o.id!==id);
+          await storageDelete(STORE_PREFIX, id);
+          renderPipelineView(main);
+        }
+      });
+      document.addEventListener('click', ()=>menu.remove(), {once:true});
+    });
+  });
+  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+  if(bulkDeleteBtn) bulkDeleteBtn.addEventListener('click', async ()=>{
+    if(!confirm(`${selected.length} Angebot(e) wirklich unwiderruflich löschen?`)) return;
+    for(const id of selected){ await storageDelete(STORE_PREFIX, id); }
+    STATE.objects = STATE.objects.filter(o=>!selected.includes(o.id));
+    STATE.selectedRows = [];
+    renderPipelineView(main);
+  });
+  const bulkClearBtn = document.getElementById('bulkClearBtn');
+  if(bulkClearBtn) bulkClearBtn.addEventListener('click', ()=>{ STATE.selectedRows = []; renderPipelineView(main); });
+}
+
+const PHASE_BAR_COLORS = {
+  neu:'#10B981', pruefung:'#3B82F6', kalkulation:'#8B5CF6', loi:'#F59E0B',
+  dd:'#EA580C', notar:'#4F46E5', abgesagt:'#9CA3AF',
+};
+
+function renderPipelineKanbanMode(main){
+  const objs = baseFilteredObjects();
+  main.innerHTML = `
+    <div class="view-header">
+      <div><h1>Pipeline</h1><p class="sub">Angebote nach Bearbeitungsphase. Karten lassen sich zwischen den Phasen verschieben.</p></div>
+    </div>
+    ${renderToolbar({showPhaseFilter:false, showSort:false, showModeToggle:true})}
+    <div class="kanban-scroll">
+      ${ALL_PHASES.map(p=>{
+        const inPhase = objs.filter(o=>o.phase===p.key);
+        const vol = inPhase.reduce((s,o)=>s+objVolume(o),0);
+        return `
+        <div class="kanban-col ${p.key==='abgesagt'?'absagen':''}" data-phase-col="${p.key}">
+          <div class="kanban-col-head"><span class="colname">${p.label}</span><span class="kanban-col-count">${inPhase.length}</span></div>
+          <div class="kanban-col-bar" style="background:${PHASE_BAR_COLORS[p.key]};"></div>
+          <div class="kanban-col-vol">${fmtMoney(vol)}</div>
+          <div class="kanban-cards" data-phase-drop="${p.key}">${inPhase.map(o=>renderCard(o)).join('')}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  wireToolbar(()=>renderPipelineView(main));
+  main.querySelectorAll('[data-card-id]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(el.classList.contains('was-dragged')) return;
+      openObjectModal(el.dataset.cardId);
+    });
+  });
+  wireKanbanDragAndDrop(main);
+}
+
+function wireKanbanDragAndDrop(main){
+  let draggedId = null;
+  let dragMoved = false;
+
+  main.querySelectorAll('.card[data-card-id]').forEach(card=>{
+    card.addEventListener('dragstart', (e)=>{
+      draggedId = card.dataset.cardId;
+      dragMoved = false;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try{ e.dataTransfer.setData('text/plain', draggedId); }catch(err){}
+    });
+    card.addEventListener('drag', ()=>{ dragMoved = true; });
+    card.addEventListener('dragend', ()=>{
+      card.classList.remove('dragging');
+      if(dragMoved){
+        card.classList.add('was-dragged');
+        setTimeout(()=>card.classList.remove('was-dragged'), 250);
+      }
+      main.querySelectorAll('.kanban-col.drag-over').forEach(c=>c.classList.remove('drag-over'));
+      draggedId = null;
+    });
+  });
+
+  main.querySelectorAll('.kanban-col').forEach(col=>{
+    col.addEventListener('dragover', (e)=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      col.classList.add('drag-over');
+    });
+    col.addEventListener('dragleave', ()=>{ col.classList.remove('drag-over'); });
+    col.addEventListener('drop', async (e)=>{
+      e.preventDefault();
+      col.classList.remove('drag-over');
+      const id = draggedId || e.dataTransfer.getData('text/plain');
+      const newPhase = col.dataset.phaseCol;
+      const obj = getObj(id);
+      if(obj && newPhase && obj.phase !== newPhase){
+        obj.phase = newPhase;
+        obj.updatedAt = new Date().toISOString();
+        await storageSave(STORE_PREFIX, obj);
+        renderPipelineView(main);
+      }
+    });
+  });
+}
+
+/* ==================== KONTAKTE ==================== */
+function contactObjects(contactId){
+  return STATE.objects.filter(o=>o.kontakt_id === contactId);
+}
+
+function renderKontakteView(main){
+  const q = STATE.filters.search.toLowerCase();
+  const roleFilter = STATE.filters.contactRole || 'all';
+  let list = STATE.contacts.filter(c=>{
+    if(!q) return true;
+    return [c.name,c.firma,c.email,c.telefon].filter(Boolean).join(' ').toLowerCase().includes(q);
+  });
+  if(roleFilter !== 'all') list = list.filter(c=>c.rolle === roleFilter);
+  list = list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+
+  const roles = ['Eigentümer','Makler','Notar','Sonstige'];
+
+  main.innerHTML = `
+    <div class="view-header plain">
+      <div><h1>Kontakte</h1><p class="sub">Eigentümer, Makler &amp; Notare</p></div>
+      <button class="btn primary" id="newContactBtn"><svg class="icon" viewBox="0 0 24 24" style="stroke:#fff; width:14px; height:14px; vertical-align:-2px; margin-right:2px;"><path d="M12 5v14M5 12h14"/></svg>Neuer Kontakt</button>
+    </div>
+    <div class="toolbar">
+      <div class="chip-row" id="roleFilterRow">
+        <button class="chip ${roleFilter==='all'?'active':''}" data-role="all">Alle</button>
+        ${roles.map(r=>`<button class="chip ${roleFilter===r?'active':''}" data-role="${r}">${r}</button>`).join('')}
+      </div>
+      <div class="search-box" style="margin-left:auto;">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" placeholder="Kontakt suchen…" value="${escapeHtml(STATE.filters.search)}" />
+      </div>
+    </div>
+    <div class="flat-list">
+      ${list.length ? list.map(c=>{
+        const linked = contactObjects(c.id);
+        const initials = (c.name||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const subtitle = c.email || c.firma || '';
+        return `
+        <div class="flat-list-row" data-contact-id="${c.id}">
+          <div class="flat-avatar">${escapeHtml(initials)}</div>
+          <div class="flat-row-main">
+            <div class="flat-row-name">${escapeHtml(c.name)||'–'}</div>
+            ${subtitle ? `<div class="flat-row-sub">${escapeHtml(subtitle)}</div>` : ''}
+          </div>
+          <span class="role-pill role-${escapeHtml(c.rolle)}">${escapeHtml(c.rolle)||'–'}</span>
+          <span class="flat-row-deals">${linked.length} Deal${linked.length===1?'':'s'}</span>
+        </div>`;
+      }).join('') : '<div class="empty-state">Noch keine Kontakte angelegt.</div>'}
+    </div>
+  `;
+  const searchInput = document.getElementById('searchInput');
+  if(searchInput) searchInput.addEventListener('input', (e)=>{ STATE.filters.search = e.target.value; renderKontakteView(main); });
+  document.getElementById('roleFilterRow').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.chip');
+    if(!btn) return;
+    STATE.filters.contactRole = btn.dataset.role;
+    renderKontakteView(main);
+  });
+  document.getElementById('newContactBtn').addEventListener('click', ()=>openContactEditor(null));
+  main.querySelectorAll('[data-contact-id]').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-open-obj-from-contact]')) return;
+      openContactEditor(el.dataset.contactId);
+    });
+  });
+  main.querySelectorAll('[data-open-obj-from-contact]').forEach(el=>{
+    el.addEventListener('click', (e)=>{ e.stopPropagation(); openObjectModal(el.dataset.openObjFromContact); });
+  });
+}
+
+/* ==================== KARTE (ALLE DEALS AUF EINER KARTE) ==================== */
+function renderKarteView(main){
+  const objs = baseFilteredObjects();
+  const withCoords = objs.filter(o=>o.lat != null && o.lng != null);
+  const withoutCoords = objs.length - withCoords.length;
+
+  main.innerHTML = `
+    <div class="view-header">
+      <div><h1>Karte</h1><p class="sub">Alle Angebote mit hinterlegter Position auf einer Karte.</p></div>
+    </div>
+    ${renderToolbar({showPhaseFilter:false, showSort:false})}
+    ${withoutCoords > 0 ? `<div class="empty-state" style="text-align:left; padding:10px 0; background:transparent;">${withoutCoords} Angebot${withoutCoords===1?'':'e'} ohne hinterlegte Position (siehe Karte &amp; Flurstück im jeweiligen Objekt).</div>` : ''}
+    <div id="karteViewMap" style="height:calc(100vh - 230px); min-height:420px; border-radius:var(--radius); border:1px solid var(--border);"></div>
+  `;
+  wireToolbar(()=>renderKarteView(main));
+
+  if(KARTE_VIEW.map){ KARTE_VIEW.map.remove(); KARTE_VIEW.map = null; }
+  const center = withCoords.length ? [withCoords[0].lat, withCoords[0].lng] : DEFAULT_CENTER;
+  const map = L.map('karteViewMap').setView(center, withCoords.length ? 11 : 9);
+  KARTE_VIEW.map = map;
+
+  const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:20, attribution:'Esri World Imagery'}).addTo(map);
+  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap'});
+  L.control.layers({'Satellit (Esri)':esriSat, 'Straßenkarte (OSM)':osm}).addTo(map);
+
+  const markers = [];
+  const cancelledIcon = new L.Icon.Default({ className: 'marker-icon-cancelled' });
+  withCoords.forEach(o=>{
+    const r = getCalcResult(o);
+    const phaseCls = 'pill-'+o.phase;
+    const marker = L.marker([o.lat, o.lng], o.phase==='abgesagt' ? {icon: cancelledIcon} : {}).addTo(map);
+    const popupHtml = `
+      <div style="font-family:inherit; min-width:180px;">
+        <div style="font-weight:700; font-size:13px; margin-bottom:3px;">${escapeHtml(o.title)}</div>
+        <div style="font-size:12px; color:#6B6B7D; margin-bottom:6px;">${escapeHtml(o.address)||''}${o.ort?', '+escapeHtml(o.ort):''}</div>
+        <div style="display:flex; gap:6px; align-items:center; margin-bottom:8px;">
+          <span class="pill ${phaseCls}">${phaseLabel(o.phase)}</span>
+          <span class="type-badge ${o.type}">${o.type==='pe'?'PE':'MFH'}</span>
+        </div>
+        <div style="font-size:13px; font-weight:700; margin-bottom:8px;">${fmtMoney(objVolume(o))}</div>
+        <button type="button" style="background:var(--primary); color:#fff; border:none; border-radius:980px; padding:6px 14px; font-size:12px; font-weight:600; cursor:pointer;" data-popup-open="${o.id}">Objekt öffnen</button>
+      </div>
+    `;
+    marker.bindPopup(popupHtml);
+    marker.on('popupopen', (e)=>{
+      const el = e.popup.getElement().querySelector('[data-popup-open]');
+      if(el) el.addEventListener('click', ()=>openObjectModal(o.id));
+    });
+    markers.push(marker);
+  });
+
+  if(markers.length > 1){
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds().pad(0.2));
+  }
+  setTimeout(()=>{ if(KARTE_VIEW.map === map){ try{ map.invalidateSize(); }catch(e){} } }, 150);
+}
+
+/* ==================== AUFGABEN (GLOBALE LISTE MIT FILTERN) ==================== */
+function renderAufgabenOverview(main){
+  const f = STATE.taskFilters;
+  let rows = [];
+  STATE.objects.forEach(o=>{
+    (o.tasks||[]).forEach(t=>{
+      rows.push({ obj:o, task:t });
+    });
+  });
+
+  const responsibleOptions = [...new Set(rows.map(r=>r.task.responsible).filter(Boolean))].sort();
+  const categoryOptions = TASK_CATEGORIES;
+
+  if(f.search){
+    const q = f.search.toLowerCase();
+    rows = rows.filter(r => (r.task.text||'').toLowerCase().includes(q) || (r.obj.title||'').toLowerCase().includes(q));
+  }
+  if(f.status !== 'all'){
+    rows = rows.filter(r => taskStatus(r.task) === f.status || (f.status==='open' && !r.task.done));
+  }
+  if(f.responsible !== 'all'){
+    rows = rows.filter(r => (r.task.responsible||'') === f.responsible);
+  }
+  if(f.category !== 'all'){
+    rows = rows.filter(r => (r.task.category||'') === f.category);
+  }
+
+  rows.sort((a,b)=>{
+    if(a.task.done !== b.task.done) return a.task.done ? 1 : -1;
+    return (a.task.due||'9999').localeCompare(b.task.due||'9999');
+  });
+
+  main.innerHTML = `
+    <div class="view-header">
+      <div><h1>Aufgaben</h1><p class="sub">Alle Aufgaben aus allen Angeboten an einem Ort.</p></div>
+    </div>
+    <div class="toolbar">
+      <div class="search-box">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="taskSearchInput" placeholder="Aufgabe oder Objekt suchen…" value="${escapeHtml(f.search)}" />
+      </div>
+      <select id="taskStatusFilter" class="filter-select">
+        <option value="all" ${f.status==='all'?'selected':''}>Alle Status</option>
+        <option value="open" ${f.status==='open'?'selected':''}>Offen</option>
+        <option value="overdue" ${f.status==='overdue'?'selected':''}>Überfällig</option>
+        <option value="warn" ${f.status==='warn'?'selected':''}>Bald fällig</option>
+        <option value="ok" ${f.status==='ok'?'selected':''}>Erledigt / im Plan</option>
+      </select>
+      <select id="taskResponsibleFilter" class="filter-select">
+        <option value="all">Alle Verantwortlichen</option>
+        ${responsibleOptions.map(r=>`<option value="${escapeHtml(r)}" ${f.responsible===r?'selected':''}>${escapeHtml(r)}</option>`).join('')}
+      </select>
+      <select id="taskCategoryFilter" class="filter-select">
+        <option value="all">Alle Kategorien</option>
+        ${categoryOptions.map(c=>`<option value="${c}" ${f.category===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table class="deals">
+        <thead><tr><th></th><th>Aufgabe</th><th>Objekt</th><th>Kategorie</th><th>Verantwortlich</th><th>Fällig</th></tr></thead>
+        <tbody>
+          ${rows.length ? rows.map(({obj,task})=>{
+            const status = taskStatus(task);
+            const dueLabel = task.due ? fmtDate(task.due) : '–';
+            return `
+            <tr data-task-row="${task.id}" data-obj-id="${obj.id}" class="${task.done?'row-done':''}">
+              <td><input type="checkbox" class="tcheck" ${task.done?'checked':''} data-ov-task-done="${task.id}" data-ov-obj-id="${obj.id}" /></td>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="dot ${status}"></span>
+                  <span style="${task.done?'text-decoration:line-through; color:var(--text-faint);':''}">${escapeHtml(task.text)}</span>
+                </div>
+              </td>
+              <td><span class="cell-name" data-open-task-obj="${obj.id}" style="cursor:pointer;">${escapeHtml(obj.title)}</span></td>
+              <td>${task.category ? `<span class="role-badge">${escapeHtml(task.category)}</span>` : '–'}</td>
+              <td>${escapeHtml(task.responsible)||'–'}</td>
+              <td class="tnum" style="${status==='overdue'?'color:var(--danger); font-weight:600;':''}">${dueLabel}</td>
+            </tr>`;
+          }).join('') : `<tr><td colspan="6"><div class="empty-state">Keine Aufgaben gefunden.</div></td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const searchInput = document.getElementById('taskSearchInput');
+  searchInput.addEventListener('input', (e)=>{ STATE.taskFilters.search = e.target.value; renderAufgabenOverview(main); });
+  document.getElementById('taskStatusFilter').addEventListener('change', (e)=>{ STATE.taskFilters.status = e.target.value; renderAufgabenOverview(main); });
+  document.getElementById('taskResponsibleFilter').addEventListener('change', (e)=>{ STATE.taskFilters.responsible = e.target.value; renderAufgabenOverview(main); });
+  document.getElementById('taskCategoryFilter').addEventListener('change', (e)=>{ STATE.taskFilters.category = e.target.value; renderAufgabenOverview(main); });
+
+  main.querySelectorAll('[data-ov-task-done]').forEach(el=>{
+    el.addEventListener('click', (e)=>e.stopPropagation());
+    el.addEventListener('change', async ()=>{
+      const obj = getObj(el.dataset.ovObjId);
+      const t = obj && obj.tasks.find(t=>t.id===el.dataset.ovTaskDone);
+      if(t){ t.done = el.checked; obj.updatedAt = new Date().toISOString(); await storageSave(STORE_PREFIX, obj); renderAufgabenOverview(main); }
+    });
+  });
+  main.querySelectorAll('[data-open-task-obj]').forEach(el=>{
+    el.addEventListener('click', ()=>openObjectModal(el.dataset.openTaskObj));
+  });
+}
+
+function linkNewInlineContact(obj){
+  openContactEditor(null);
+  const observer = new MutationObserver(()=>{
+    if(!document.getElementById('modalRoot').querySelector('.modal-overlay .modal[style*="520px"]')){
+      const latest = STATE.contacts[STATE.contacts.length-1];
+      if(latest && !obj.kontakt_id){ obj.kontakt_id = latest.id; scheduleSave(obj); renderApp(); }
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.getElementById('modalRoot'), {childList:true, subtree:true});
+}
+
+function openContactEditor(contactId){
+  const isNew = !contactId;
+  const contact = isNew ? newContact() : getContact(contactId);
+  const linked = isNew ? [] : contactObjects(contact.id);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-head">
+        <div class="modal-head-row">
+          <div><div class="breadcrumb">Kontakte</div><div style="font-size:18px; font-weight:700;">${isNew?'Neuer Kontakt':'Kontakt bearbeiten'}</div></div>
+          <button class="icon-btn" id="closeContactBtn">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field span-2"><label>Name</label><input id="ct-name" value="${escapeHtml(contact.name)}" placeholder="Vor- und Nachname" /></div>
+          <div class="field"><label>Firma</label><input id="ct-firma" value="${escapeHtml(contact.firma)}" /></div>
+          <div class="field"><label>Rolle</label>
+            <select id="ct-rolle">
+              ${['Eigentümer','Makler','Notar','Sonstige'].map(r=>`<option value="${r}" ${r===contact.rolle?'selected':''}>${r}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>Telefon</label><input id="ct-telefon" value="${escapeHtml(contact.telefon)}" /></div>
+          <div class="field"><label>E-Mail</label><input id="ct-email" value="${escapeHtml(contact.email)}" /></div>
+          <div class="field span-2"><label>Notiz</label><textarea id="ct-notiz" rows="3">${escapeHtml(contact.notiz)}</textarea></div>
+        </div>
+        ${linked.length ? `
+        <div class="section-title">Verknüpfte Objekte</div>
+        <div>${linked.map(o=>`<span class="linked-obj-chip" data-open-linked="${o.id}">${escapeHtml(o.title)}</span>`).join('')}</div>
+        ` : ''}
+      </div>
+      <div class="footer-actions">
+        <button class="btn danger-outline" id="deleteContactBtn" ${isNew?'style="visibility:hidden;"':''}>Kontakt löschen</button>
+        <button class="btn primary" id="saveContactBtn">${isNew?'Anlegen':'Speichern'}</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector('#closeContactBtn').addEventListener('click', ()=>overlay.remove());
+  overlay.querySelectorAll('[data-open-linked]').forEach(el=>{
+    el.addEventListener('click', ()=>{ overlay.remove(); openObjectModal(el.dataset.openLinked); });
+  });
+  overlay.querySelector('#saveContactBtn').addEventListener('click', async ()=>{
+    contact.name = overlay.querySelector('#ct-name').value.trim();
+    contact.firma = overlay.querySelector('#ct-firma').value.trim();
+    contact.rolle = overlay.querySelector('#ct-rolle').value;
+    contact.telefon = overlay.querySelector('#ct-telefon').value.trim();
+    contact.email = overlay.querySelector('#ct-email').value.trim();
+    contact.notiz = overlay.querySelector('#ct-notiz').value.trim();
+    contact.updatedAt = new Date().toISOString();
+    if(!contact.name){ alert('Bitte einen Namen angeben.'); return; }
+    if(isNew) STATE.contacts.push(contact);
+    await storageSave(CONTACT_PREFIX, contact);
+    overlay.remove();
+    renderApp();
+  });
+  if(!isNew){
+    overlay.querySelector('#deleteContactBtn').addEventListener('click', async ()=>{
+      if(!confirm(`Kontakt "${contact.name}" wirklich löschen?`)) return;
+      STATE.contacts = STATE.contacts.filter(c=>c.id!==contact.id);
+      STATE.objects.filter(o=>o.kontakt_id===contact.id).forEach(o=>{ o.kontakt_id = null; storageSave(STORE_PREFIX, o); });
+      await storageDelete(CONTACT_PREFIX, contact.id);
+      overlay.remove();
+      renderApp();
+    });
+  }
+}
+
+function renderCard(o){
+  const r = getCalcResult(o);
+  const openTasks = (o.tasks||[]).filter(t=>!t.done);
+  let worstStatus = 'none';
+  const order = {overdue:3, warn:2, ok:1, none:0};
+  openTasks.forEach(t=>{ const s = taskStatus(t); if(order[s] > order[worstStatus]) worstStatus = s; });
+  const marginNeg = r.marge_pct != null && r.marge_pct < 0;
+  return `
+    <div class="card" data-card-id="${o.id}" draggable="true">
+      <div class="card-top">
+        <p class="card-title">${escapeHtml(o.title)}</p>
+        <span class="type-badge ${o.type}">${o.type==='pe'?'PE':'MFH'}</span>
+      </div>
+      <div class="card-sub">${escapeHtml(o.address || 'Adresse noch offen')}${o.ort?', '+escapeHtml(o.ort):''}</div>
+      <div class="card-meta">
+        <div class="card-price tnum">${fmtMoney(objVolume(o))}</div>
+        <div class="card-margin ${marginNeg?'neg':''}">${r.marge_pct!=null?fmtPct(r.marge_pct):'–'}</div>
+      </div>
+      <div class="card-tasks">
+        <span class="dot ${worstStatus}"></span>
+        <span>${openTasks.length} offene Aufgabe${openTasks.length===1?'':'n'}</span>
+      </div>
+    </div>
+  `;
+}
+
+const ABSAGE_GRUENDE = ['Mikrolage','Makrolage','Grundstückszuschnitt','Bebaubarkeit','Kaufpreiserwartung'];
+
+function openAbsageGrundDialog(obj){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:440px;">
+      <div class="modal-head">
+        <div class="modal-head-row">
+          <div><div class="breadcrumb">Phase ändern</div><div style="font-size:18px; font-weight:700;">Deal absagen</div></div>
+          <button class="icon-btn" id="closeAbsageBtn">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="field span-2"><label>Grund der Absage</label>
+            <select id="absageGrundSelect">
+              <option value="">– bitte wählen –</option>
+              ${ABSAGE_GRUENDE.map(g=>`<option value="${g}" ${obj.absage_grund===g?'selected':''}>${g}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn" id="cancelAbsageBtn">Abbrechen</button>
+        <button class="btn primary" id="saveAbsageBtn">Absage speichern</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalRoot').appendChild(overlay);
+  const cancel = ()=>{ overlay.remove(); renderApp(); };
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) cancel(); });
+  overlay.querySelector('#closeAbsageBtn').addEventListener('click', cancel);
+  overlay.querySelector('#cancelAbsageBtn').addEventListener('click', cancel);
+  overlay.querySelector('#saveAbsageBtn').addEventListener('click', ()=>{
+    const grund = overlay.querySelector('#absageGrundSelect').value;
+    if(!grund){ alert('Bitte einen Grund auswählen.'); return; }
+    obj.phase = 'abgesagt';
+    obj.absage_grund = grund;
+    scheduleSave(obj);
+    overlay.remove();
+    renderApp();
+  });
+}
+
+/* ==================== OBJECT MODAL ==================== */
+const MODAL = { objectId:null, tab:'stammdaten', map:null, drawnItems:null, saveTimer:null };
+const KARTE_VIEW = { map:null };
+const UI_TOGGLES = { grundstueck:false, karte:true, kalkulation:true, summary:true, karteGross:false };
+
+/* Waehrend ein Kalkulationsfeld aktiv getippt wird, zeigen wir den Rohtext
+   des Nutzers unveraendert an (kein Tausender-/Nachkommastellen-Formatting
+   mitten im Tippen) -- sonst wuerde z.B. "5,95" beim zweiten Zeichen zu
+   "5,00" umformatiert und das eigene Komma des Nutzers landet hinter der
+   bereits ergaenzten Nachkommastelle ("5,00,"). Formatiert wird erst wieder,
+   sobald ein anderes Feld editiert wird bzw. der Tab neu geoeffnet wird. */
+let CALC_RAW_EDIT = null; // {kind:'c'|'p'|'bnk', key, pid, raw}
+let CALC_RAW_EDIT_TIMER = null;
+function calcInputValue(kind, key, pid, rawNum, decimals){
+  if(CALC_RAW_EDIT && CALC_RAW_EDIT.kind===kind && CALC_RAW_EDIT.key===key && CALC_RAW_EDIT.pid===(pid ?? null)){
+    return CALC_RAW_EDIT.raw;
+  }
+  return formatEditableNumber(rawNum, decimals);
+}
+/* Nach kurzer Tipppause den Rohtext wieder in die formatierte Darstellung
+   (Tausenderpunkt etc.) umwandeln -- so bleibt ein Feld nicht dauerhaft
+   unformatiert stehen, wenn der Nutzer danach nichts anderes mehr editiert. */
+function scheduleRawEditClear(renderFn){
+  clearTimeout(CALC_RAW_EDIT_TIMER);
+  CALC_RAW_EDIT_TIMER = setTimeout(()=>{ CALC_RAW_EDIT = null; renderFn(); }, 900);
+}
+
+function collapseBtn(key, labelClosed, labelOpen){
+  const open = !!UI_TOGGLES[key];
+  return `
+    <button class="btn small toggle-btn" data-toggle="${key}" type="button">
+      <svg class="icon" viewBox="0 0 24 24" style="width:13px; height:13px; transform:rotate(${open?'0':'-90'}deg); transition:transform .15s;"><path d="m6 9 6 6 6-6"/></svg>
+      ${open ? (labelOpen||labelClosed+' ausblenden') : labelClosed}
+    </button>
+  `;
+}
+function getObj(id){ return STATE.objects.find(o=>o.id===id); }
+function scheduleSave(obj){
+  obj.updatedAt = new Date().toISOString();
+  clearTimeout(MODAL.saveTimer);
+  MODAL.saveTimer = setTimeout(()=>{ storageSave(STORE_PREFIX, obj); }, 500);
+}
+
+function openNewObjectFlow(){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-head">
+        <div class="modal-head-row">
+          <div><div class="breadcrumb">Neues Angebot</div><div style="font-size:18px; font-weight:700;">Welcher Typ?</div></div>
+          <button class="icon-btn" id="cancelNew">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="type-toggle" style="margin-bottom:0;">
+          <button data-t="pe"><b>Projektentwicklung</b><span>Grundstück kaufen, parzellieren, Häuser bauen &amp; verkaufen.</span></button>
+          <button data-t="mfh"><b>MFH zur Aufteilung</b><span>Ankauf Mehrfamilienhaus → WEG-Teilung → Einzelverkauf.</span></button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.querySelector('#cancelNew').addEventListener('click', ()=>overlay.remove());
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelectorAll('[data-t]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const obj = newObject(btn.dataset.t);
+      STATE.objects.push(obj);
+      await storageSave(STORE_PREFIX, obj);
+      overlay.remove();
+      openObjectModal(obj.id, 'stammdaten');
+    });
+  });
+}
+
+function openObjectModal(id, tab){
+  if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+  MODAL.objectId = id;
+  MODAL.tab = tab || 'stammdaten';
+  pushRecentlyViewed(id);
+  renderApp();
+}
+function closeModal(){
+  if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+  MODAL.objectId = null;
+  renderApp();
+}
+
+const TABS = [
+  {key:'stammdaten', label:'Details'},
+  {key:'aufgaben', label:'Aufgaben'},
+  {key:'dokumente', label:'Dokumente'},
+];
+
+function breadcrumbFor(obj){
+  return obj.type === 'pe'
+    ? 'Ankauf · Projektentwicklung · Grundstücksparzellierung'
+    : 'Ankauf · Mehrfamilienhaus · WEG-Aufteilung';
+}
+function objectDisplayId(obj){
+  const sorted = [...STATE.objects].sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+  const idx = sorted.findIndex(o=>o.id===obj.id);
+  return idx >= 0 ? idx+1 : '–';
+}
+
+function renderObjectPage(main){
+  const obj = getObj(MODAL.objectId);
+  if(!obj){ MODAL.objectId = null; if(STATE.view==='dashboard') renderDashboard(main); else renderApp(); return; }
+  if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+
+  const openTasks = (obj.tasks||[]).filter(t=>!t.done).length;
+  const overdueCount = (obj.tasks||[]).filter(t=>taskStatus(t)==='overdue').length;
+
+  const listForNav = (STATE.view === 'pipeline' && STATE.pipelineMode === 'list') ? dealsFilteredObjects() : baseFilteredObjects();
+  const idx = listForNav.findIndex(o=>o.id===obj.id);
+  const prevId = idx > 0 ? listForNav[idx-1].id : null;
+  const nextId = (idx>=0 && idx < listForNav.length-1) ? listForNav[idx+1].id : null;
+
+  main.innerHTML = `
+    <div class="object-sticky-head">
+    <div class="object-header">
+      <button class="back-link" id="backLink">← Zurück zur Liste</button>
+      <div class="object-header-top">
+        <div class="thumb-lg">${iconHome()}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="title-input" id="titleInput">${escapeHtml(obj.address) || 'Adresse noch offen'}${(obj.plz||obj.ort) ? ', '+escapeHtml([obj.plz,obj.ort].filter(Boolean).join(' ')) : ''}</div>
+          <div class="object-subline" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <span class="type-badge ${obj.type}">${obj.type==='pe'?'Projektentwicklung':'MFH-Aufteilung'}</span>
+            <select id="phaseSelect" class="phase-select pill pill-${obj.phase}">
+              ${ALL_PHASES.map(p=>`<option value="${p.key}" ${p.key===obj.phase?'selected':''}>${p.label}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="modal-head-actions">
+          <button class="icon-btn" id="prevObjBtn" ${!prevId?'disabled style="opacity:.35;"':''}>‹</button>
+          <button class="icon-btn" id="nextObjBtn" ${!nextId?'disabled style="opacity:.35;"':''}>›</button>
+          <button class="icon-btn" id="deleteObjBtn" title="Löschen"><svg class="icon" viewBox="0 0 24 24" style="width:15px;height:15px;"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar page-tabbar">
+      ${TABS.map(t=>`<button class="tab-btn ${t.key===MODAL.tab?'active':''}" data-tab="${t.key}">${t.label}${t.key==='aufgaben' && openTasks ? ` (${openTasks}${overdueCount?', '+overdueCount+' überfällig':''})`:''}</button>`).join('')}
+    </div>
+    </div>
+    <div class="object-body" id="modalBody"></div>
+  `;
+
+  document.getElementById('backLink').addEventListener('click', closeModal);
+  if(prevId) document.getElementById('prevObjBtn').addEventListener('click', ()=>openObjectModal(prevId, MODAL.tab));
+  if(nextId) document.getElementById('nextObjBtn').addEventListener('click', ()=>openObjectModal(nextId, MODAL.tab));
+  document.getElementById('phaseSelect').addEventListener('change', (e)=>{
+    const newPhase = e.target.value;
+    if(newPhase === 'abgesagt'){ openAbsageGrundDialog(obj); return; }
+    obj.phase = newPhase; scheduleSave(obj); renderApp();
+  });
+  document.getElementById('deleteObjBtn').addEventListener('click', async ()=>{
+    if(confirm(`"${obj.title}" wirklich unwiderruflich löschen?`)){
+      STATE.objects = STATE.objects.filter(o=>o.id!==obj.id);
+      await storageDelete(STORE_PREFIX, obj.id);
+      closeModal();
+    }
+  });
+  document.querySelectorAll('.page-tabbar .tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+      MODAL.tab = btn.dataset.tab;
+      renderObjectPage(main);
+    });
+  });
+  renderTabBody(obj);
+}
+
+function renderTabBody(obj){
+  const body = document.getElementById('modalBody');
+  if(MODAL.tab === 'stammdaten') return renderStammdatenTab(body, obj);
+  if(MODAL.tab === 'aufgaben') return renderAufgabenTab(body, obj);
+  if(MODAL.tab === 'dokumente') return renderDokumenteTab(body, obj);
+}
+
+function renderKeyFacts(obj){
+  if(obj.type !== 'pe'){
+    return `
+      <div class="keyfacts-row">
+        <div class="kf-chip"><div class="kf-label">Fläche</div><div class="kf-value">${objAreaLabel(obj)}</div></div>
+        <div class="kf-chip"><div class="kf-label">Einheiten</div><div class="kf-value">${fmtNum(obj.einheiten||0,0)}</div></div>
+        <div class="kf-chip" style="background:var(--warn-soft); border-color:#f5e0b8;"><div class="kf-label" style="color:#a06a12;">Kalkulation</div><div class="kf-value" style="font-size:13px; color:#a06a12;">folgt in Kürze</div></div>
+      </div>
+    `;
+  }
+  const r = getCalcResult(obj);
+  const facts = [
+    {label:'Kaufpreis', value: fmtMoney(r.nettokaufpreis), sub: r.nettokaufpreis_je_qm!=null ? fmtMoney(r.nettokaufpreis_je_qm)+'/m²' : null},
+    {label:'Gewinn', value: fmtMoney(r.deckungsbeitrag)},
+    {label:'Projektmarge', value: fmtPct(r.deckungsbeitrag_pct)},
+    {label:'Eigenkapital', value: fmtMoney(r.eigenkapital)},
+    {label:'Parzellen', value: fmtNum(r.anzahlParzellen,0)},
+    {label:'Grundstücksgröße', value: objAreaLabel(obj)},
+  ];
+  return `
+    <div class="keyfacts-row">
+      ${facts.map(f=>`<div class="kf-chip"><div class="kf-label">${f.label}</div><div class="kf-value">${f.value}</div>${f.sub?`<div class="kf-sub">${f.sub}</div>`:''}</div>`).join('')}
+    </div>
+  `;
+}
+
+/* ---------------- TAB: STAMMDATEN (+ ANSPRECHPARTNER) ---------------- */
+function formattedAddress(obj){
+  return [obj.address, [obj.plz, obj.ort].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+}
+/* Der Deal-Name (Kanban-Karte, Listenansicht) hat kein eigenes Eingabefeld mehr
+   (Kopfzeile zeigt nur noch die Adresse, nicht editierbar) -- daher hier
+   automatisch mitziehen, sobald sich die Adresse aendert. */
+function syncTitleFromAddress(obj){
+  if(obj.address) obj.title = formattedAddress(obj);
+}
+function setupAddressAutocomplete(body, obj, onSelect){
+  const input = body.querySelector('#addressAutocomplete');
+  const box = body.querySelector('#addressSuggestions');
+  if(!input || !box) return;
+  let debounceTimer = null;
+  let currentSeq = 0;
+
+  input.value = formattedAddress(obj);
+
+  function closeBox(){ box.classList.remove('open'); box.innerHTML = ''; }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim();
+    clearTimeout(debounceTimer);
+    if(q.length < 3){ closeBox(); return; }
+    debounceTimer = setTimeout(()=>{
+      const seq = ++currentSeq;
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=de&limit=6&lat=50.68&lon=8.69&bbox=7.7,49.35,10.25,51.75`;
+      fetch(url).then(r=>r.json()).then(data=>{
+        if(seq !== currentSeq) return;
+        const feats = (data && data.features) || [];
+        if(!feats.length){
+          box.innerHTML = '<div class="address-suggestion" style="cursor:default; color:var(--text-faint);">Keine Treffer</div>';
+          box.classList.add('open');
+          return;
+        }
+        box.innerHTML = feats.map((f,i)=>{
+          const p = f.properties || {};
+          const main = [p.street, p.housenumber].filter(Boolean).join(' ') || p.name || '–';
+          const sub = [p.postcode, p.city || p.town || p.village].filter(Boolean).join(' ');
+          return `<div class="address-suggestion" data-idx="${i}"><div class="as-main">${escapeHtml(main)}</div><div class="as-sub">${escapeHtml(sub)}</div></div>`;
+        }).join('');
+        box.classList.add('open');
+        box.querySelectorAll('.address-suggestion[data-idx]').forEach(el=>{
+          el.addEventListener('mousedown', (e)=>{
+            e.preventDefault();
+            const f = feats[Number(el.dataset.idx)];
+            const p = f.properties || {};
+            const [lng, lat] = f.geometry.coordinates;
+            obj.address = [p.street, p.housenumber].filter(Boolean).join(' ') || obj.address;
+            obj.plz = p.postcode || obj.plz;
+            obj.ort = p.city || p.town || p.village || obj.ort;
+            if(p.state && BUNDESLAENDER.includes(p.state)) obj.bundesland = p.state;
+            obj.lat = lat; obj.lng = lng;
+            syncTitleFromAddress(obj);
+            scheduleSave(obj);
+            closeBox();
+            input.value = formattedAddress(obj);
+            onSelect && onSelect();
+          });
+        });
+      }).catch(()=>{
+        box.innerHTML = '<div class="address-suggestion" style="cursor:default; color:var(--text-faint);">Adresssuche nicht erreichbar (offline?)</div>';
+        box.classList.add('open');
+      });
+    }, 300);
+  });
+
+  /* Adresse nicht gefunden: kein Treffer angeklickt, aber Text eingegeben ->
+     beim Verlassen des Feldes den getippten Text direkt als Adresse
+     uebernehmen (Straße/PLZ/Ort lassen sich dann nicht mehr automatisch
+     trennen, deshalb landet alles gesammelt in "Adresse"). */
+  input.addEventListener('blur', ()=>{
+    setTimeout(()=>{
+      closeBox();
+      const typed = input.value.trim();
+      if(typed && typed !== formattedAddress(obj)){
+        obj.address = typed;
+        obj.plz = '';
+        obj.ort = '';
+        syncTitleFromAddress(obj);
+        scheduleSave(obj);
+        onSelect && onSelect();
+      }
+    }, 150);
+  });
+}
+
+function renderStammdatenTab(body, obj){
+  CALC_RAW_EDIT = null;
+  const isPE = obj.type === 'pe';
+  const contact = obj.kontakt_id ? getContact(obj.kontakt_id) : null;
+
+  body.classList.remove('two-col');
+  body.innerHTML = `
+    <div id="keyFactsSection">${renderKeyFacts(obj)}</div>
+
+    <div class="collapse-block">
+      ${collapseBtn('karte', 'Karte, Adresse &amp; Flurstück anzeigen', 'Karte, Adresse &amp; Flurstück ausblenden')}
+      <div style="display:${UI_TOGGLES.karte?'block':'none'}; margin-top:16px;">
+        <div class="form-grid" style="grid-template-columns:1fr 220px; align-items:end; margin-bottom:16px;">
+          <div class="field" style="position:relative;">
+            <label>Adresse suchen <span class="hint">tippen &amp; auswählen – setzt Straße, PLZ, Ort &amp; Position automatisch</span></label>
+            <input id="addressAutocomplete" placeholder="z.B. Kirchgasse 1, 65183 Wiesbaden" autocomplete="off" />
+            <div id="addressSuggestions" class="address-suggestions"></div>
+          </div>
+          <div class="field"><label>Bundesland <span class="hint">für Grunderwerbsteuer</span></label>
+            <select data-f="bundesland">${BUNDESLAENDER.map(b=>`<option value="${b}" ${b===obj.bundesland?'selected':''}>${b}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div id="karteSection"></div>
+      </div>
+    </div>
+
+    <div class="collapse-block">
+      ${collapseBtn('grundstueck', 'Grundstücksdetails anzeigen', 'Grundstücksdetails ausblenden')}
+      <div style="display:${UI_TOGGLES.grundstueck?'block':'none'}; margin-top:16px;">
+        ${isPE ? `
+        <div class="section-title">Planungsrecht &amp; Zonierung</div>
+        <div class="form-grid cols-1">
+          <div class="field"><label>Planungsrecht</label>
+            <select data-f="planungsrecht"><option value="" ${!obj.planungsrecht?'selected':''}>– bitte wählen –</option>
+            ${['§34 BauGB','B-Plan vorhanden','B-Plan in Aufstellung','§35 BauGB (Außenbereich)','sonstiges'].map(v=>`<option value="${v}" ${v===obj.planungsrecht?'selected':''}>${v}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Baurecht</label>
+            <select data-f="baurecht"><option value="" ${!obj.baurecht?'selected':''}>– bitte wählen –</option>
+            ${['Baugenehmigung','Bauvoranfrage gestellt','Kein Baurecht','In Prüfung'].map(v=>`<option value="${v}" ${v===obj.baurecht?'selected':''}>${v}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Abriss erforderlich</label>
+            <select data-f="abriss"><option value="Nein" ${obj.abriss==='Nein'?'selected':''}>Nein</option><option value="Ja" ${obj.abriss==='Ja'?'selected':''}>Ja</option></select>
+          </div>
+          <div class="field"><label>GRZ</label><input data-f="grz" type="number" step="any" value="${obj.grz ?? ''}" /></div>
+          <div class="field"><label>GFZ</label><input data-f="gfz" type="number" step="any" value="${obj.gfz ?? ''}" /></div>
+          <div class="field"><label>Bodenrichtwert <span class="hint">€/m²</span></label><input data-f="bodenrichtwert" type="number" value="${obj.bodenrichtwert ?? ''}" /></div>
+        </div>` : ''}
+
+        ${isPE ? `
+        <div class="form-grid cols-1">
+          <div class="field"><label>Grundstücksgröße <span class="hint">m² · manueller Fallback, sonst per Python-Erfassung</span></label><input data-f="grundstuecksgroesse" type="number" value="${obj.grundstuecksgroesse ?? ''}" /></div>
+        </div>
+        ` : `
+        <div class="section-title">Flächen &amp; Einheiten</div>
+        <div class="form-grid cols-1">
+          <div class="field"><label>Grundstücksgröße <span class="hint">m²</span></label><input data-f="grundstuecksgroesse" type="number" value="${obj.grundstuecksgroesse ?? ''}" /></div>
+          <div class="field"><label>Wohn-/Nutzfläche <span class="hint">m²</span></label><input data-f="wohnflaeche" type="number" value="${obj.wohnflaeche ?? ''}" /></div>
+          <div class="field"><label>Anzahl Einheiten</label><input data-f="einheiten" type="number" value="${obj.einheiten ?? ''}" /></div>
+        </div>
+        `}
+      </div>
+    </div>
+
+    <div class="collapse-block">
+      ${collapseBtn('kalkulation', 'Kalkulation anzeigen', 'Kalkulation ausblenden')}
+      <div style="display:${UI_TOGGLES.kalkulation?'block':'none'}; margin-top:16px;">
+        <div id="calcSection"></div>
+      </div>
+    </div>
+
+    <div class="collapse-block">
+      ${collapseBtn('summary', 'Summary anzeigen', 'Summary ausblenden')}
+      <div style="display:${UI_TOGGLES.summary?'block':'none'}; margin-top:16px;">
+        <div id="summarySection"></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:28px;">Notizen</div>
+    <div class="form-grid"><div class="field span-2"><textarea data-f="notizen" rows="3" placeholder="Freitext…">${escapeHtml(obj.notizen)}</textarea></div></div>
+
+    <div class="side-card" style="max-width:420px; margin-top:20px;">
+      <h4>Herkunft &amp; Status</h4>
+      <div class="field" style="margin-bottom:10px;">
+        <label>Quelle des Angebots</label>
+        ${contact ? `
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px;">
+            <span style="font-size:13px;"><strong>${escapeHtml(contact.name)}</strong>${contact.firma?' · '+escapeHtml(contact.firma):''}</span>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button class="btn small" id="editContactLinkBtn">Bearbeiten</button>
+              <button class="btn small danger-outline" id="unlinkContactBtn">Entfernen</button>
+            </div>
+          </div>
+        ` : `
+          <select id="contactSelect" class="line-input" style="width:100%; margin-bottom:8px;">
+            <option value="">– Kontakt wählen –</option>
+            ${STATE.contacts.map(c=>`<option value="${c.id}">${escapeHtml(c.name)}${c.firma?' · '+escapeHtml(c.firma):''}</option>`).join('')}
+          </select>
+          <button class="btn small primary" id="newInlineContactBtn" style="width:100%;">+ Neuen Kontakt anlegen</button>
+        `}
+      </div>
+      <div class="contact-row"><span class="l">Angelegt am</span><span class="r">${fmtDate((obj.createdAt||'').slice(0,10))}</span></div>
+      <div class="contact-row"><span class="l">Zuletzt aktualisiert</span><span class="r">${fmtDate((obj.updatedAt||'').slice(0,10))}</span></div>
+    </div>
+
+    ${obj.phase === 'abgesagt' ? `
+    <div class="section-title">Absage</div>
+    <div class="form-grid"><div class="field span-2"><label>Grund der Absage</label>
+      <select data-f="absage_grund">
+        <option value="">– bitte wählen –</option>
+        ${ABSAGE_GRUENDE.map(g=>`<option value="${g}" ${obj.absage_grund===g?'selected':''}>${g}</option>`).join('')}
+      </select>
+    </div></div>` : ''}
+  `;
+
+  body.querySelectorAll('[data-f]').forEach(el=>{
+    const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+    el.addEventListener(evt, ()=>{
+      const f = el.dataset.f;
+      const numeric = ['grundstuecksgroesse','wohnflaeche','einheiten','baujahr','grz','gfz','bodenrichtwert'].includes(f);
+      obj[f] = numeric ? (el.value===''? null : Number(el.value)) : el.value;
+      if(f === 'bundesland' && obj.type === 'pe' && GRUNDERWERBSTEUER[el.value] != null){
+        obj.calc.grunderwerbsteuer_pct = GRUNDERWERBSTEUER[el.value];
+      }
+      scheduleSave(obj);
+      if(f === 'bundesland') renderStammdatenTab(body, obj);
+    });
+  });
+
+  setupAddressAutocomplete(body, obj, ()=>renderStammdatenTab(body, obj));
+
+  const contactSelect = body.querySelector('#contactSelect');
+  if(contactSelect) contactSelect.addEventListener('change', ()=>{
+    if(contactSelect.value){ obj.kontakt_id = contactSelect.value; scheduleSave(obj); renderStammdatenTab(body, obj); }
+  });
+  const newInlineBtn = body.querySelector('#newInlineContactBtn');
+  if(newInlineBtn) newInlineBtn.addEventListener('click', ()=>linkNewInlineContact(obj));
+  const editLinkBtn = body.querySelector('#editContactLinkBtn');
+  if(editLinkBtn) editLinkBtn.addEventListener('click', ()=>openContactEditor(obj.kontakt_id));
+  const unlinkBtn = body.querySelector('#unlinkContactBtn');
+  if(unlinkBtn) unlinkBtn.addEventListener('click', ()=>{ obj.kontakt_id = null; scheduleSave(obj); renderStammdatenTab(body, obj); });
+
+  body.querySelectorAll('[data-toggle]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const key = el.dataset.toggle;
+      UI_TOGGLES[key] = !UI_TOGGLES[key];
+      if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+      renderStammdatenTab(body, obj);
+    });
+  });
+
+  if(UI_TOGGLES.kalkulation){
+    const calcSection = body.querySelector('#calcSection');
+    if(obj.type === 'pe') renderKalkulationPE(calcSection, obj);
+    else renderKalkulationPlaceholder(calcSection, obj);
+  }
+  if(UI_TOGGLES.summary && obj.type === 'pe'){
+    renderErgebnisPE(body.querySelector('#summarySection'), obj);
+  } else if(UI_TOGGLES.summary){
+    renderKalkulationPlaceholder(body.querySelector('#summarySection'), obj);
+  }
+  if(UI_TOGGLES.karte){
+    renderKarteInto(body.querySelector('#karteSection'), obj);
+  }
+}
+
+/* ---------------- KALKULATION (gerendert innerhalb Details-Tab) ---------------- */
+function abwLine(pct, abs){
+  if(pct == null && abs == null) return '–';
+  return `${pct!=null?fmtPct(pct):'–'} · ${abs!=null?fmtMoney(abs):'–'}`;
+}
+function abwWunschFarbe(abwAbs, abwPct){
+  if(abwAbs == null) return 'var(--text-faint)';
+  if(abwAbs > 0) return 'var(--ok)';
+  if(abwPct != null && Math.abs(abwPct) < 10) return 'var(--warn)';
+  return 'var(--danger)';
+}
+function calcLine(label, field, ansatzVal, unit, gesamtVal, opts){
+  opts = opts || {};
+  const isInput = field != null;
+  const decimals = opts.decimals ?? 0;
+  return `
+    <div class="calc-line ${opts.bold?'total':''}">
+      <div class="cl-label">${label}</div>
+      <div class="cl-ansatz">
+        ${unit ? `<span class="unit">${unit}</span>` : `<div></div>`}
+        ${isInput ? `<input class="tnum" data-c="${field}" type="text" inputmode="decimal" value="${calcInputValue('c', field, null, ansatzVal, decimals)}" />` : `<span class="tnum cl-ansatz-static">${ansatzVal!=null?ansatzVal:'–'}</span>`}
+      </div>
+      <div class="cl-gesamt tnum">${gesamtVal}</div>
+    </div>
+  `;
+}
+function calcTableHead(){
+  return `<div class="calc-table-head"><div class="cl-label">Bezeichnung</div><div class="cl-ansatz">Ansatz</div><div class="cl-gesamt">Gesamt</div></div>`;
+}
+
+/* Findet per Bisektion den Nettokaufpreis, bei dem die Projektmarge
+   (Deckungsbeitrag % v. GIK) den Zielwert erreicht. Die Marge faellt mit
+   steigendem Kaufpreis monoton (Erloes ist fix, GIK steigt) -- Bisektion ist
+   damit ein sicheres, formel-unabhaengiges Verfahren. */
+function solveNettokaufpreisFuerMarge(obj, targetPct){
+  const originalPreis = obj.calc.nettokaufpreis;
+  let lo = 0, hi = Math.max(2000000, obj.calc.parcels.length * 600000 * 3);
+  for(let i=0; i<60; i++){
+    const mid = (lo + hi) / 2;
+    obj.calc.nettokaufpreis = mid;
+    const r = calcPE(obj);
+    if(r.deckungsbeitrag_pct > targetPct){ lo = mid; } else { hi = mid; }
+  }
+  const solved = (lo + hi) / 2;
+  obj.calc.nettokaufpreis = originalPreis;
+  return solved;
+}
+
+const BASIS_SZENARIO_QM_JE_PARZELLE = 250;
+
+function planBasisSzenario(obj){
+  const groesse = obj.grundstuecksgroesse || 0;
+  const anzahlParzellen = Math.floor(groesse / BASIS_SZENARIO_QM_JE_PARZELLE);
+  if(anzahlParzellen < 1){
+    alert(`Grundstücksgröße muss mindestens ${BASIS_SZENARIO_QM_JE_PARZELLE} m² betragen.`);
+    return;
+  }
+  const baukosten_pro_m2 = anzahlParzellen <= 3 ? 3000 : 2650;
+  obj.calc.parcels = Array.from({length: anzahlParzellen}, () => ({
+    id: taskId(), wohnflaeche: 130, baukosten_pro_m2, verkaufspreis_haus: 600000, grundstueck_qm: BASIS_SZENARIO_QM_JE_PARZELLE,
+  }));
+  obj.einheiten = anzahlParzellen;
+  obj.calc.baunebenkosten_items = anzahlParzellen <= 3 ? [] : [
+    {id:bnkId(), label:'Hausanschlusskosten', mode:'je_haus', ansatz:15000},
+    {id:bnkId(), label:'Grundstücksteilung', mode:'je_haus', ansatz:5000},
+    {id:bnkId(), label:'Abrisskosten', mode:'pauschal', ansatz:0},
+    {id:bnkId(), label:'Sonstige Kosten', mode:'pauschal', ansatz:10000},
+  ];
+  const solvedPreis = solveNettokaufpreisFuerMarge(obj, 25);
+  obj.calc.nettokaufpreis = Math.round(solvedPreis/100)*100;
+}
+
+function renderKalkulationPE(body, obj){
+  const c = obj.calc;
+  const r = calcPE(obj);
+  const parcels = c.parcels;
+  const items = c.baunebenkosten_items;
+
+  body.innerHTML = `
+    <div class="two-col-grid" style="align-items:stretch;">
+    <div class="calc-section-card" style="margin-bottom:0;">
+      <div class="section-title" style="margin-top:0;">1. Grundstückskosten</div>
+      <div class="calc-table">
+        ${calcTableHead()}
+        ${calcLine('Nettokaufpreis','nettokaufpreis', c.nettokaufpreis, '€', fmtMoney(c.nettokaufpreis))}
+        ${calcLine('Grunderwerbsteuer','grunderwerbsteuer_pct', c.grunderwerbsteuer_pct, `% (${escapeHtml(obj.bundesland||'—')})`, fmtMoney(r.grest), {decimals:2})}
+        ${calcLine('Notar','notarkosten_pct', c.notarkosten_pct, '%', fmtMoney(r.notar), {decimals:2})}
+        ${calcLine('Makler','maklerkosten_pct', c.maklerkosten_pct, '%', fmtMoney(r.makler), {decimals:2})}
+        ${calcLine('Sonstiges','sonstige_erwerbsnebenkosten_pct', c.sonstige_erwerbsnebenkosten_pct, '%', fmtMoney(r.sonstigeErwerb), {decimals:2})}
+        ${calcLine('Erwerbsnebenkosten', null, fmtPct(r.erwerbsnebenkosten_pct), '', fmtMoney(r.erwerbsnebenkosten), {bold:true})}
+        ${calcLine('Bruttokaufpreis', null, r.bruttokaufpreis_je_qm!=null?fmtMoney(r.bruttokaufpreis_je_qm)+'/m²':'–', '', fmtMoney(r.bruttokaufpreis), {bold:true})}
+      </div>
+    </div>
+
+    <div class="calc-section-card" style="margin-bottom:0;">
+      <div class="section-title" style="margin-top:0;">2. Finanzierung &amp; Vertrieb</div>
+      <div class="calc-table">
+        ${calcTableHead()}
+        ${calcLine('Eigenkapitalquote','eigenkapital_pct', c.eigenkapital_pct, '%', fmtMoney(r.eigenkapital), {decimals:2})}
+        ${calcLine('Fremdkapital', null, fmtPct(100-(c.eigenkapital_pct||0)), '', fmtMoney(r.fremdkapital))}
+        <div class="calc-line">
+          <div class="cl-label">Finanzierung</div>
+          <div class="cl-ansatz" style="width:auto; display:flex; justify-content:flex-end; gap:14px;">
+            <span style="display:flex; align-items:center; gap:6px;">
+              <span class="unit">%</span>
+              <input class="tnum" data-c="zinssatz_pct_pa" type="text" inputmode="decimal" value="${calcInputValue('c','zinssatz_pct_pa',null,c.zinssatz_pct_pa,2)}" style="width:80px;" />
+            </span>
+            <span style="display:flex; align-items:center; gap:6px;">
+              <span class="unit">Monate</span>
+              <input class="tnum" data-c="laufzeit_monate" type="text" inputmode="decimal" value="${calcInputValue('c','laufzeit_monate',null,c.laufzeit_monate,0)}" style="width:80px;" />
+            </span>
+          </div>
+          <div class="cl-gesamt tnum">${fmtMoney(r.zinskosten)}</div>
+        </div>
+        ${calcLine('Bearbeitungsgebühr','bearbeitungsgebuehr_pct', c.bearbeitungsgebuehr_pct, '% v. FK', fmtMoney(r.bearbeitungsgebuehr), {decimals:2})}
+        ${calcLine('Vertriebskosten','vertriebskosten_pct', c.vertriebskosten_pct, '% v. Erlös', fmtMoney(r.vertriebskosten), {decimals:2})}
+        ${calcLine('Sonstige Kosten','sonstige_kosten_ertrag_pct', c.sonstige_kosten_ertrag_pct, '% v. Erlös', fmtMoney(r.sonstigeKostenErtrag), {decimals:2})}
+      </div>
+    </div>
+    </div>
+
+    <div class="calc-section-card">
+      <div class="section-title" style="margin-top:0;">3. Baunebenkosten</div>
+      <button class="btn small" id="addBnkBtn" style="margin-bottom:12px;" ${items.length>=10?'disabled':''}>+ Position hinzufügen</button>
+      <div class="calc-table">
+        <div class="calc-table-head"><div class="cl-label">Bezeichnung</div><div class="cl-ansatz" style="width:190px;">Ansatz</div><div class="cl-gesamt">Gesamtkosten</div><div style="width:28px;"></div></div>
+        ${items.map(item=>`
+          <div class="calc-line" data-bnk-row="${item.id}">
+            <div class="cl-label"><input class="line-input" data-bnk-label="${item.id}" value="${escapeHtml(item.label)}" style="width:100%;" /></div>
+            <div class="cl-ansatz">
+              <select class="line-input" data-bnk-mode="${item.id}" style="font-size:12px; width:100%;">
+                <option value="je_haus" ${item.mode==='je_haus'?'selected':''}>€ je Haus</option>
+                <option value="pauschal" ${item.mode==='pauschal'?'selected':''}>Pauschal</option>
+              </select>
+              <input class="tnum" data-bnk-ansatz="${item.id}" type="text" inputmode="decimal" value="${calcInputValue('bnk', item.id, null, item.ansatz, 0)}" />
+            </div>
+            <div class="cl-gesamt tnum">${fmtMoney(r.baunebenkostenItems.find(i=>i.id===item.id).gesamt)}</div>
+            <div style="width:28px; text-align:right;"><button class="btn small danger-outline" data-bnk-del="${item.id}" ${items.length<=1?'disabled':''}>×</button></div>
+          </div>
+        `).join('')}
+        <div class="calc-line total"><div class="cl-label">Summe Baunebenkosten</div><div class="cl-ansatz"></div><div class="cl-gesamt tnum">${fmtMoney(r.sonstigeKostenGesamt)}</div><div style="width:28px;"></div></div>
+      </div>
+    </div>
+
+    <div class="calc-section-card">
+      <div class="section-title" style="margin-top:0;">4. Parzellierung</div>
+      <button class="btn small" id="addParcelBtn" style="margin-bottom:12px;" ${parcels.length>=10?'disabled':''}>+ Parzelle hinzufügen</button>
+      <div class="table-wrap table-wrap-plain" style="overflow-x:auto;">
+      <table class="compare-table" style="font-size:12.5px;">
+        <thead><tr>
+          <th>Parzelle</th><th class="tnum">Wohnfläche m²</th><th class="tnum">Grundstück m²</th><th class="tnum">Baukosten €/m²</th><th class="tnum">Hauskosten</th><th class="tnum">Gestehungskosten</th><th class="tnum">Verkaufspreis Haus €</th><th class="tnum">€/m²</th><th class="tnum">VK Grundstück</th><th class="tnum">€/m²</th><th class="tnum">DB Grundstück</th><th></th>
+        </tr></thead>
+        <tbody>
+          <tr class="bulk-apply-row">
+            <td></td>
+            <td class="tnum">
+              <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;">
+                <input class="tnum line-input" id="bulkWohnflaeche" type="text" inputmode="decimal" placeholder="alle" style="width:56px;" />
+                <button class="btn small" id="applyBulkWohnflaeche" title="Für alle Parzellen übernehmen">↧</button>
+              </div>
+            </td>
+            <td></td>
+            <td class="tnum">
+              <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;">
+                <input class="tnum line-input" id="bulkBaukosten" type="text" inputmode="decimal" placeholder="alle" style="width:56px;" />
+                <button class="btn small" id="applyBulkBaukosten" title="Für alle Parzellen übernehmen">↧</button>
+              </div>
+            </td>
+            <td></td>
+            <td></td>
+            <td class="tnum">
+              <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;">
+                <input class="tnum line-input" id="bulkVerkaufspreis" type="text" inputmode="decimal" placeholder="alle" style="width:66px;" />
+                <button class="btn small" id="applyBulkVerkaufspreis" title="Für alle Parzellen übernehmen">↧</button>
+              </div>
+            </td>
+            <td></td><td></td><td></td><td></td><td></td>
+          </tr>
+          ${parcels.map((p,i)=>{
+            const pr = r.parzellenErgebnis[i];
+            return `
+            <tr data-parcel-row="${p.id}">
+              <td style="font-weight:600;">${i+1}</td>
+              <td class="tnum"><input class="tnum line-input" data-p="wohnflaeche" data-pid="${p.id}" type="text" inputmode="decimal" value="${calcInputValue('p','wohnflaeche',p.id,p.wohnflaeche,0)}" style="width:90px;" /></td>
+              <td class="tnum"><input class="tnum line-input" data-p="grundstueck_qm" data-pid="${p.id}" type="text" inputmode="decimal" value="${calcInputValue('p','grundstueck_qm',p.id,pr.grundstueck_qm,0)}" style="width:80px;" /></td>
+              <td class="tnum"><input class="tnum line-input" data-p="baukosten_pro_m2" data-pid="${p.id}" type="text" inputmode="decimal" value="${calcInputValue('p','baukosten_pro_m2',p.id,p.baukosten_pro_m2,0)}" style="width:90px;" /></td>
+              <td class="tnum">${fmtMoney(pr.hauskosten)}</td>
+              <td class="tnum">${fmtMoney(pr.gestehungskosten)}</td>
+              <td class="tnum"><input class="tnum line-input" data-p="verkaufspreis_haus" data-pid="${p.id}" type="text" inputmode="decimal" value="${calcInputValue('p','verkaufspreis_haus',p.id,p.verkaufspreis_haus,0)}" style="width:100px;" /></td>
+              <td class="tnum" style="color:var(--text-faint);">${pr.verkaufspreis_haus_je_qm!=null?fmtMoney(pr.verkaufspreis_haus_je_qm):'–'}</td>
+              <td class="tnum">${fmtMoney(pr.verkaufspreis_grundstueck)}</td>
+              <td class="tnum" style="color:var(--text-faint);">${pr.verkaufspreis_grundstueck_je_qm!=null?fmtMoney(pr.verkaufspreis_grundstueck_je_qm):'–'}</td>
+              <td class="tnum" style="font-weight:600; color:${pr.deckungsbeitrag_grundstueck<0?'var(--danger)':'var(--ok)'};">${fmtMoney(pr.deckungsbeitrag_grundstueck)}</td>
+              <td><button class="btn small danger-outline" data-del-parcel="${p.id}" ${parcels.length<=1?'disabled':''}>×</button></td>
+            </tr>`;
+          }).join('')}
+          <tr class="total-row">
+            <td>Summe</td><td class="tnum">${fmtNum(r.sumWohnflaeche,0)}</td><td class="tnum">${fmtNum(obj.grundstuecksgroesse||0,0)}</td><td></td>
+            <td class="tnum">${fmtMoney(r.sumHauskosten)}</td><td class="tnum">${fmtMoney(r.sumGestehungskosten)}</td>
+            <td class="tnum">${fmtMoney(r.verkaufserloes)}</td><td></td><td class="tnum">${fmtMoney(r.sumVerkaufspreisGrundstueck)}</td><td></td><td class="tnum">${fmtMoney(r.sumDeckungsbeitragGrundstueck)}</td><td></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  `;
+
+  body.querySelectorAll('[data-c]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const distFromEnd = el.value.length - (el.selectionStart ?? el.value.length);
+      CALC_RAW_EDIT = {kind:'c', key:el.dataset.c, pid:null, raw:el.value};
+      obj.calc[el.dataset.c] = parseEditableNumber(el.value);
+      scheduleSave(obj);
+      const focused = el.dataset.c;
+      renderKalkulationPE(body, obj);
+      refocusPreservingCaret(body.querySelector(`[data-c="${focused}"]`), distFromEnd);
+      scheduleRawEditClear(()=>renderKalkulationPE(body, obj));
+    });
+  });
+  body.querySelectorAll('[data-p]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const distFromEnd = el.value.length - (el.selectionStart ?? el.value.length);
+      const pid = el.dataset.pid;
+      CALC_RAW_EDIT = {kind:'p', key:el.dataset.p, pid, raw:el.value};
+      const parcel = obj.calc.parcels.find(p=>p.id===pid);
+      if(parcel){ parcel[el.dataset.p] = parseEditableNumber(el.value) ?? 0; }
+      scheduleSave(obj);
+      const focused = {p:el.dataset.p, pid};
+      renderKalkulationPE(body, obj);
+      refocusPreservingCaret(body.querySelector(`[data-p="${focused.p}"][data-pid="${focused.pid}"]`), distFromEnd);
+      scheduleRawEditClear(()=>renderKalkulationPE(body, obj));
+    });
+  });
+  body.querySelectorAll('[data-del-parcel]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(obj.calc.parcels.length<=1) return;
+      obj.calc.parcels = obj.calc.parcels.filter(p=>p.id!==el.dataset.delParcel);
+      obj.einheiten = obj.calc.parcels.length;
+      scheduleSave(obj);
+      renderKalkulationPE(body, obj);
+    });
+  });
+  const addBtn = document.getElementById('addParcelBtn');
+  if(addBtn) addBtn.addEventListener('click', ()=>{
+    if(obj.calc.parcels.length >= 10) return;
+    obj.calc.parcels.push(newParcel());
+    obj.einheiten = obj.calc.parcels.length;
+    scheduleSave(obj);
+    renderKalkulationPE(body, obj);
+  });
+
+  function wireBulkApply(inputId, btnId, field){
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    if(!btn || !input) return;
+    const apply = ()=>{
+      const val = parseEditableNumber(input.value);
+      if(val == null) return;
+      obj.calc.parcels.forEach(p=>{ p[field] = val; });
+      scheduleSave(obj);
+      renderKalkulationPE(body, obj);
+    };
+    btn.addEventListener('click', apply);
+    input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') apply(); });
+  }
+  wireBulkApply('bulkWohnflaeche', 'applyBulkWohnflaeche', 'wohnflaeche');
+  wireBulkApply('bulkBaukosten', 'applyBulkBaukosten', 'baukosten_pro_m2');
+  wireBulkApply('bulkVerkaufspreis', 'applyBulkVerkaufspreis', 'verkaufspreis_haus');
+
+  body.querySelectorAll('[data-bnk-label]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const item = obj.calc.baunebenkosten_items.find(i=>i.id===el.dataset.bnkLabel);
+      if(item) item.label = el.value;
+      scheduleSave(obj);
+    });
+  });
+  body.querySelectorAll('[data-bnk-mode]').forEach(el=>{
+    el.addEventListener('change', ()=>{
+      const item = obj.calc.baunebenkosten_items.find(i=>i.id===el.dataset.bnkMode);
+      if(item) item.mode = el.value;
+      scheduleSave(obj);
+      renderKalkulationPE(body, obj);
+    });
+  });
+  body.querySelectorAll('[data-bnk-ansatz]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const distFromEnd = el.value.length - (el.selectionStart ?? el.value.length);
+      CALC_RAW_EDIT = {kind:'bnk', key:el.dataset.bnkAnsatz, pid:null, raw:el.value};
+      const item = obj.calc.baunebenkosten_items.find(i=>i.id===el.dataset.bnkAnsatz);
+      if(item) item.ansatz = parseEditableNumber(el.value) ?? 0;
+      scheduleSave(obj);
+      const focused = el.dataset.bnkAnsatz;
+      renderKalkulationPE(body, obj);
+      refocusPreservingCaret(body.querySelector(`[data-bnk-ansatz="${focused}"]`), distFromEnd);
+      scheduleRawEditClear(()=>renderKalkulationPE(body, obj));
+    });
+  });
+  body.querySelectorAll('[data-bnk-del]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(obj.calc.baunebenkosten_items.length<=1) return;
+      obj.calc.baunebenkosten_items = obj.calc.baunebenkosten_items.filter(i=>i.id!==el.dataset.bnkDel);
+      scheduleSave(obj);
+      renderKalkulationPE(body, obj);
+    });
+  });
+  const addBnkBtn = document.getElementById('addBnkBtn');
+  if(addBnkBtn) addBnkBtn.addEventListener('click', ()=>{
+    if(obj.calc.baunebenkosten_items.length >= 10) return;
+    obj.calc.baunebenkosten_items.push({id:bnkId(), label:'Neue Position', mode:'pauschal', ansatz:0});
+    scheduleSave(obj);
+    renderKalkulationPE(body, obj);
+  });
+
+  renderErgebnisPEIfOpen(obj);
+}
+
+function renderErgebnisPEIfOpen(obj){
+  const summaryEl = document.getElementById('summarySection');
+  if(summaryEl && UI_TOGGLES.summary) renderErgebnisPE(summaryEl, obj);
+  const keyFactsEl = document.getElementById('keyFactsSection');
+  if(keyFactsEl) keyFactsEl.innerHTML = renderKeyFacts(obj);
+}
+
+function renderErgebnisPE(container, obj){
+  const r = calcPE(obj);
+  const c = obj.calc;
+  const ankaufspreisJeParzelle = (r.anzahlParzellen>0 && c.nettokaufpreis!=null) ? c.nettokaufpreis/r.anzahlParzellen : null;
+  container.innerHTML = `
+    <div class="two-col-grid" style="align-items:start;">
+      <div class="calc-result">
+        <div class="result-stats">
+          <div class="result-stat highlight ${r.deckungsbeitrag<0?'negative':''}">
+            <div class="rs-label">Deckungsbeitrag</div>
+            <div class="rs-value">${fmtMoney(r.deckungsbeitrag)}</div>
+          </div>
+          <div class="result-stat highlight ${r.deckungsbeitrag_pct<0?'negative':''}">
+            <div class="rs-label">Projektmarge</div>
+            <div class="rs-value">${fmtPct(r.deckungsbeitrag_pct)}</div>
+          </div>
+          <div class="result-stat highlight">
+            <div class="rs-label">Ø Ankaufspreis je Parzelle</div>
+            <div class="rs-value">${ankaufspreisJeParzelle!=null?fmtMoney(ankaufspreisJeParzelle):'–'}</div>
+          </div>
+        </div>
+
+        <div class="result-group-label">Kosten &amp; Finanzierung</div>
+        <div class="result-row"><span>Gesamtinvestitionskosten (GIK)</span><span class="v">${fmtMoney(r.gik)}</span></div>
+        <div class="result-row"><span>Eigenkapital</span><span class="v">${fmtMoney(r.eigenkapital)}</span></div>
+        <div class="result-row"><span>Fremdkapital</span><span class="v">${fmtMoney(r.fremdkapital)}</span></div>
+        <div class="result-row"><span>Finanzierungskosten</span><span class="v">${fmtMoney(r.finanzierungskosten)}</span></div>
+        <div class="result-row"><span>Vertriebskosten</span><span class="v">${fmtMoney(r.vertriebskosten)}</span></div>
+        <div class="result-row"><span>Sonstige Kosten (Ertrag)</span><span class="v">${fmtMoney(r.sonstigeKostenErtrag)}</span></div>
+        <div class="result-row total"><span>Summe Verkaufserlös (Häuser)</span><span class="v">${fmtMoney(r.verkaufserloes)}</span></div>
+      </div>
+
+      <div class="calc-section-card" style="margin-bottom:0;">
+        <div class="section-title" style="margin-top:0;">Vergleichswerte &amp; Abweichung vom Kaufpreis</div>
+        <div class="table-wrap table-wrap-plain">
+          <table class="compare-table">
+            <thead><tr><th>Bezeichnung</th><th class="tnum">Wert</th><th class="tnum">€/m²</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Bodenrichtwert <span class="hint">(Stammdaten)</span></td>
+                <td class="tnum">${fmtMoney(r.bodenrichtwert_gesamt)}</td>
+                <td class="tnum">${r.bodenrichtwert_je_qm!=null?fmtMoney(r.bodenrichtwert_je_qm):'–'}</td>
+              </tr>
+              <tr>
+                <td>Kaufpreiswunsch <span class="hint">(Verkäufer)</span></td>
+                <td class="tnum"><input class="tnum line-input" data-c="kaufpreiswunsch" type="text" inputmode="decimal" value="${calcInputValue('c','kaufpreiswunsch',null,c.kaufpreiswunsch,0)}" placeholder="€ gesamt" style="width:110px;" /></td>
+                <td class="tnum">${r.kaufpreiswunsch_je_qm!=null?fmtMoney(r.kaufpreiswunsch_je_qm):'–'}</td>
+              </tr>
+              <tr class="total-row">
+                <td>Unser Nettokaufpreis</td>
+                <td class="tnum">${fmtMoney(c.nettokaufpreis)}</td>
+                <td class="tnum">${r.nettokaufpreis_je_qm!=null?fmtMoney(r.nettokaufpreis_je_qm):'–'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="calc-table" style="margin-top:16px;">
+          <div class="calc-line">
+            <div class="cl-label">Abweichung vs. Bodenrichtwert</div>
+            <div class="cl-gesamt tnum" style="width:auto; font-weight:700; color:${r.abwBrwAbs==null?'var(--text-faint)':(r.abwBrwAbs<0?'var(--ok)':'var(--danger)')};">
+              ${abwLine(r.abwBrwPct, r.abwBrwAbs)}
+            </div>
+          </div>
+          <div class="calc-line">
+            <div class="cl-label">Abweichung vs. Kaufpreiswunsch</div>
+            <div class="cl-gesamt tnum" style="width:auto; font-weight:700; color:${abwWunschFarbe(r.abwWunschAbs, r.abwWunschPct)};">
+              ${abwLine(r.abwWunschPct, r.abwWunschAbs)}
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11.5px; color:var(--text-faint); margin-top:10px;">Negative Abweichung (grün) = wir kaufen günstiger als der Vergleichswert.</div>
+
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; align-items:flex-start;">
+          <div>
+            <button class="btn" id="adjustKaufpreisBtn">Kaufpreis für 25 % Marge anpassen</button>
+            <div style="font-size:11.5px; color:var(--text-faint); margin-top:4px;">Ändert nur den Kaufpreis, sodass die Projektmarge (Deckungsbeitrag % v. GIK) 25 % beträgt.</div>
+          </div>
+          <div>
+            <button class="btn" id="planBasisSzenarioBtn" ${obj.grundstuecksgroesse>=BASIS_SZENARIO_QM_JE_PARZELLE?'':`disabled title="Erst Grundstücksgröße (min. ${BASIS_SZENARIO_QM_JE_PARZELLE} m²) erfassen"`}>Basis-Szenario planen (${BASIS_SZENARIO_QM_JE_PARZELLE} m²/Parzelle)</button>
+            <div style="font-size:11.5px; color:var(--text-faint); margin-top:4px;">Teilt die Grundstücksgröße in ${BASIS_SZENARIO_QM_JE_PARZELLE}-m²-Parzellen auf, setzt Baukosten/Baunebenkosten je nach Anzahl (≤3: 3.000 €/m², keine Baunebenkosten · ≥4: 2.650 €/m² + Hausanschluss/Teilung/Abriss/Sonstiges) und Verkaufspreis 600.000 € je Haus, dann den Kaufpreis für 25 % Projektmarge.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const adjustKaufpreisBtn = container.querySelector('#adjustKaufpreisBtn');
+  if(adjustKaufpreisBtn) adjustKaufpreisBtn.addEventListener('click', ()=>{
+    obj.calc.nettokaufpreis = Math.round(solveNettokaufpreisFuerMarge(obj, 25)/100)*100;
+    scheduleSave(obj);
+    const calcSectionEl = document.getElementById('calcSection');
+    if(calcSectionEl && UI_TOGGLES.kalkulation) renderKalkulationPE(calcSectionEl, obj);
+    renderErgebnisPEIfOpen(obj);
+  });
+  const planBtn = container.querySelector('#planBasisSzenarioBtn');
+  if(planBtn) planBtn.addEventListener('click', ()=>{
+    planBasisSzenario(obj);
+    scheduleSave(obj);
+    const calcSectionEl = document.getElementById('calcSection');
+    if(calcSectionEl && UI_TOGGLES.kalkulation) renderKalkulationPE(calcSectionEl, obj);
+    renderErgebnisPEIfOpen(obj);
+  });
+
+  const kaufpreiswunschInput = container.querySelector('[data-c="kaufpreiswunsch"]');
+  if(kaufpreiswunschInput){
+    kaufpreiswunschInput.addEventListener('input', ()=>{
+      const distFromEnd = kaufpreiswunschInput.value.length - (kaufpreiswunschInput.selectionStart ?? kaufpreiswunschInput.value.length);
+      CALC_RAW_EDIT = {kind:'c', key:'kaufpreiswunsch', pid:null, raw:kaufpreiswunschInput.value};
+      obj.calc.kaufpreiswunsch = parseEditableNumber(kaufpreiswunschInput.value);
+      scheduleSave(obj);
+      renderErgebnisPE(container, obj);
+      refocusPreservingCaret(container.querySelector('[data-c="kaufpreiswunsch"]'), distFromEnd);
+      scheduleRawEditClear(()=>renderErgebnisPE(container, obj));
+    });
+  }
+}
+
+function renderKalkulationPlaceholder(body, obj){
+  body.innerHTML = `
+    <div class="empty-state" style="text-align:left; padding:22px; background:var(--warn-soft); border:1px solid #f5e0b8; border-radius:12px;">
+      <div style="font-weight:700; color:#a06a12; margin-bottom:4px;">Kalkulation für MFH-Aufteilung folgt in Kürze</div>
+      <div style="color:#8a6a2a; font-size:13px;">Sobald das Rechenmodell für den Ankauf und die Einzelaufteilung von Mehrfamilienhäusern vorliegt, wird es hier ergänzt.</div>
+    </div>
+  `;
+}
+
+/* ---------------- TAB: KARTE ---------------- */
+const HESSEN_WMS_URL = 'https://inspire-hessen.de/ows/services/org.2.07247d95-adc7-4c7d-9c7a-ed17af855317_wms?';
+const HESSEN_WMS_LAYER = 'CP.CadastralParcel';
+const DEFAULT_CENTER = [50.6825, 8.6900];
+
+function renderKarteInto(container, obj){
+  const hasCoords = obj.lat != null && obj.lng != null;
+  const gmapsQuery = encodeURIComponent([obj.address, obj.plz, obj.ort].filter(Boolean).join(', ') || 'Hessen');
+  const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${gmapsQuery}`;
+  const brwWert = obj.bodenrichtwert_amtlich ? obj.bodenrichtwert_amtlich.wert : obj.bodenrichtwert;
+  const brwGesamt = (brwWert != null && obj.grundstuecksgroesse) ? brwWert * obj.grundstuecksgroesse : null;
+
+  const gross = !!UI_TOGGLES.karteGross;
+
+  const infoCardsHtml = `
+    <div class="side-card"><h4>Grundstück</h4>
+      <div style="font-size:13px;">
+        <div>Größe: <strong>${obj.grundstuecksgroesse ? fmtNum(obj.grundstuecksgroesse,0)+' m²' : '–'}</strong></div>
+        <div>Länge × Breite: <strong>${(obj.grundstueck_laenge && obj.grundstueck_breite) ? `${fmtNum(obj.grundstueck_laenge,1)} m × ${fmtNum(obj.grundstueck_breite,1)} m` : '–'}</strong></div>
+      </div>
+    </div>
+    <div class="side-card"><h4>Bodenrichtwert</h4>
+      <div style="font-size:13px;">
+        <div>Je m²: <strong>${brwWert!=null ? fmtNum(brwWert,0)+' €/m²' : '–'}</strong></div>
+        <div>Gesamt: <strong>${brwGesamt!=null ? fmtMoney(brwGesamt) : '–'}</strong></div>
+        ${obj.bodenrichtwert_amtlich ? `<div style="color:var(--text-faint); margin-top:4px;">${escapeHtml(obj.bodenrichtwert_amtlich.nutzung||'')} · Stichtag ${fmtDate(obj.bodenrichtwert_amtlich.stichtag)}</div>` : ''}
+      </div>
+    </div>
+    <div class="side-card"><h4>Flurstück${obj.grundstueck_teile && obj.grundstueck_teile.length>1 ? ` (${obj.grundstueck_teile.length})` : ''}</h4>
+      <div style="font-size:13px;">
+        ${obj.grundstueck_teile && obj.grundstueck_teile.length ? `
+          ${obj.grundstueck_teile.map(t=>`<div>${escapeHtml(t.label||'–')} · ${fmtNum(t.area,0)} m²</div>`).join('')}
+          <div style="margin-top:4px;">Amtliche Gesamtfläche: <strong>${fmtNum(obj.flurstueck_amtlich.area,0)} m²</strong></div>
+          <div style="color:var(--text-faint); margin-top:4px;">Kennzeichen: ${escapeHtml(obj.flurstueck_amtlich.ref||'–')}</div>
+        ` : obj.flurstueck_amtlich ? `
+          <div>Bezeichnung: <strong>${escapeHtml(obj.flurstueck_amtlich.label || obj.flurstueck || '–')}</strong></div>
+          <div>Amtliche Fläche: <strong>${fmtNum(obj.flurstueck_amtlich.area,0)} m²</strong></div>
+          <div style="color:var(--text-faint); margin-top:4px;">Kennzeichen: ${escapeHtml(obj.flurstueck_amtlich.ref||'–')}</div>
+        ` : `<div style="color:var(--text-faint);">Noch nicht erfasst.</div>`}
+      </div>
+    </div>
+  `;
+
+  const multiPanelHtml = (MULTI_SELECT && MULTI_SELECT.active) ? `
+    <div class="side-card" style="margin-top:12px; border-color:var(--primary);">
+      <h4>Mehrere Flurstücke auswählen</h4>
+      <div style="font-size:12px; color:var(--text-faint); margin-bottom:8px;">Klicke nacheinander auf jedes Flurstück, das zum Grundstück gehört.</div>
+      ${MULTI_SELECT.results.length ? MULTI_SELECT.results.map((r,i)=>`
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px;">
+          <span>${escapeHtml(r.label||'–')} · ${fmtNum(r.area_qm,0)} m²</span>
+          <button class="btn small danger-outline" data-remove-multi="${i}">×</button>
+        </div>
+      `).join('') : '<div style="color:var(--text-faint); font-size:13px;">Noch keine Auswahl.</div>'}
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="btn primary small" id="applyMultiBtn" ${MULTI_SELECT.results.length<1?'disabled':''}>Übernehmen (${MULTI_SELECT.results.length})</button>
+        <button class="btn small" id="cancelMultiBtn">Abbrechen</button>
+      </div>
+    </div>
+  ` : '';
+
+  container.innerHTML = `
+    <div class="map-tools">
+      <button class="btn" id="grundstueckErfassenBtn" ${hasCoords?'':'disabled title="Erst Position setzen oder Adresse auswählen"'}>Grundstück erfassen</button>
+      <button class="btn" id="multiFlurstueckBtn">${(MULTI_SELECT && MULTI_SELECT.active) ? '🧩 Mehrfachauswahl aktiv…' : '🧩 Mehrere Flurstücke'}</button>
+      <button class="btn" id="toggleKarteGrossBtn">${gross?'⤡ Karte verkleinern':'⤢ Karte vergrößern'}</button>
+      <button class="btn" id="centerMapBtn" ${hasCoords?'':'disabled title="Erst Position setzen oder Adresse auswählen"'}>⌖ Position zentrieren</button>
+      <a class="btn" href="${gmapsUrl}" target="_blank" rel="noopener" style="margin-left:auto;">In Google Maps öffnen ↗</a>
+      <a class="btn" href="https://bauleitplanung.hessen.de/interaktive-karten/interaktive-karte-bebauungsplaene" target="_blank" rel="noopener" title="Öffnet die Gemeinde-Übersicht – Gemeinde dort manuell auswählen, keine Koordinaten-Verlinkung möglich">Bebauungsplan prüfen ↗</a>
+    </div>
+    ${gross ? `
+      <div id="map"></div>
+      ${multiPanelHtml}
+      <div class="map-info-grid">${infoCardsHtml}</div>
+    ` : `
+      <div class="map-compact-grid">
+        <div class="map-compact-side">${infoCardsHtml}${multiPanelHtml}</div>
+        <div>
+          <div id="map" class="map-compact"></div>
+        </div>
+      </div>
+    `}
+  `;
+  initMap(obj, MULTI_SELECT && MULTI_SELECT.savedView);
+  const grundstueckBtn = container.querySelector('#grundstueckErfassenBtn');
+  if(grundstueckBtn) grundstueckBtn.addEventListener('click', ()=>erfasseGrundstueckViaPython(container, obj));
+  container.querySelector('#toggleKarteGrossBtn').addEventListener('click', ()=>{
+    UI_TOGGLES.karteGross = !UI_TOGGLES.karteGross;
+    if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+    renderKarteInto(container, obj);
+  });
+  const centerBtn = container.querySelector('#centerMapBtn');
+  if(centerBtn) centerBtn.addEventListener('click', ()=>{
+    if(MODAL.map && obj.lat != null && obj.lng != null) MODAL.map.setView([obj.lat, obj.lng], 19);
+  });
+  container.querySelector('#multiFlurstueckBtn').addEventListener('click', ()=>{
+    MULTI_SELECT = (MULTI_SELECT && MULTI_SELECT.active) ? null : {active:true, results:[]};
+    renderKarteInto(container, obj);
+  });
+  const applyMultiBtn = container.querySelector('#applyMultiBtn');
+  if(applyMultiBtn) applyMultiBtn.addEventListener('click', ()=>{
+    const combined = combineFlurstuecke(MULTI_SELECT.results);
+    obj.polygon = null;
+    obj.polygon_area = combined.area_qm;
+    obj.grundstuecksgroesse = Math.round(combined.area_qm);
+    obj.grundstueck_laenge = combined.length_m;
+    obj.grundstueck_breite = combined.width_m;
+    obj.grundstueck_teile = MULTI_SELECT.results.map(r=>({label:r.label, ref:r.nationalCadastralReference, area:r.area_qm, polygon:r.polygon}));
+    obj.flurstueck = MULTI_SELECT.results.map(r=>r.label).join(', ');
+    obj.flurstueck_amtlich = {
+      label: obj.flurstueck, area: combined.area_qm,
+      ref: MULTI_SELECT.results.map(r=>r.nationalCadastralReference).join('; '),
+    };
+    if(combined.bodenrichtwert_eur_m2 != null){
+      const first = MULTI_SELECT.results.find(r=>r.bodenrichtwert_eur_m2!=null) || {};
+      obj.bodenrichtwert = Math.round(combined.bodenrichtwert_eur_m2);
+      obj.bodenrichtwert_amtlich = {
+        wert: combined.bodenrichtwert_eur_m2, stichtag: first.bodenrichtwert_stichtag,
+        nutzung: first.bodenrichtwert_nutzung, gemarkung: first.bodenrichtwert_gemarkung,
+      };
+    }
+    scheduleSave(obj);
+    MULTI_SELECT = null;
+    renderKarteInto(container, obj);
+  });
+  const cancelMultiBtn = container.querySelector('#cancelMultiBtn');
+  if(cancelMultiBtn) cancelMultiBtn.addEventListener('click', ()=>{
+    MULTI_SELECT = null;
+    renderKarteInto(container, obj);
+  });
+  container.querySelectorAll('[data-remove-multi]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      MULTI_SELECT.results.splice(Number(el.dataset.removeMulti), 1);
+      renderKarteInto(container, obj);
+    });
+  });
+}
+
+const GRUNDSTUECK_SERVICE_URL = 'http://127.0.0.1:5001';
+let MULTI_SELECT = null; // {active:true, results:[...]} waehrend "Mehrere Flurstuecke" aktiv ist
+
+/* Lat/Lon -> lokale Meter-Koordinaten (gleiche Naeherung wie im Python-Dienst) */
+function localXYJS(coords, lat0, lng0){
+  const mLat = 111320.0;
+  const mLng = 111320.0 * Math.cos(lat0 * Math.PI/180);
+  return coords.map(([lat,lng]) => [(lng-lng0)*mLng, (lat-lat0)*mLat]);
+}
+function convexHullJS(points){
+  const pts = [...points].sort((a,b)=> a[0]-b[0] || a[1]-b[1]);
+  if(pts.length <= 2) return pts;
+  const cross = (o,a,b) => (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]);
+  const lower = [];
+  for(const p of pts){
+    while(lower.length>=2 && cross(lower[lower.length-2], lower[lower.length-1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for(let i=pts.length-1; i>=0; i--){
+    const p = pts[i];
+    while(upper.length>=2 && cross(upper[upper.length-2], upper[upper.length-1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  lower.pop(); upper.pop();
+  return lower.concat(upper);
+}
+function minBoundingRectangleJS(hull){
+  const n = hull.length;
+  if(n < 3){
+    const xs = hull.map(p=>p[0]), ys = hull.map(p=>p[1]);
+    return [Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys)];
+  }
+  let bestArea = null, bestDims = [0,0];
+  for(let i=0;i<n;i++){
+    const [x1,y1] = hull[i];
+    const [x2,y2] = hull[(i+1)%n];
+    const angle = Math.atan2(y2-y1, x2-x1);
+    const c = Math.cos(-angle), s = Math.sin(-angle);
+    const rotated = hull.map(([px,py]) => [px*c - py*s, px*s + py*c]);
+    const xs = rotated.map(p=>p[0]), ys = rotated.map(p=>p[1]);
+    const w = Math.max(...xs)-Math.min(...xs), h = Math.max(...ys)-Math.min(...ys);
+    const area = w*h;
+    if(bestArea===null || area<bestArea){ bestArea = area; bestDims=[w,h]; }
+  }
+  return bestDims;
+}
+/* Fasst mehrere einzeln abgefragte Flurstuecke (Ergebnisse von /grundstueck) zu
+   einer Gesamtgroesse zusammen: Flaechen werden amtlich aufsummiert, Laenge/Breite
+   ueber die konvexe Huelle ALLER beteiligten Eckpunkte (kein echtes Polygon-Union
+   noetig, da die Huelle fuer die Bounding-Box-Messung ausreicht), Bodenrichtwert
+   als flaechengewichteter Durchschnitt. */
+function combineFlurstuecke(results){
+  const allPoints = [];
+  results.forEach(r => (r.polygon||[]).forEach(p => allPoints.push(p)));
+  const lat0 = allPoints.reduce((s,p)=>s+p[0],0) / allPoints.length;
+  const lng0 = allPoints.reduce((s,p)=>s+p[1],0) / allPoints.length;
+  const xy = localXYJS(allPoints, lat0, lng0);
+  const hull = convexHullJS(xy);
+  const [a, b] = minBoundingRectangleJS(hull);
+  const length_m = Math.max(a,b), width_m = Math.min(a,b);
+  const area_qm = results.reduce((s,r)=>s+(r.area_qm||0), 0);
+  const brwEntries = results.filter(r=>r.bodenrichtwert_eur_m2!=null);
+  let bodenrichtwert_eur_m2 = null;
+  if(brwEntries.length){
+    const totalArea = brwEntries.reduce((s,r)=>s+(r.area_qm||0), 0);
+    bodenrichtwert_eur_m2 = totalArea > 0
+      ? brwEntries.reduce((s,r)=>s + r.bodenrichtwert_eur_m2*(r.area_qm||0), 0) / totalArea
+      : brwEntries.reduce((s,r)=>s + r.bodenrichtwert_eur_m2, 0) / brwEntries.length;
+  }
+  return { area_qm, length_m, width_m, bodenrichtwert_eur_m2 };
+}
+
+async function erfasseGrundstueckViaPython(container, obj){
+  if(obj.lat == null || obj.lng == null){
+    alert('Bitte zuerst eine Position auf der Karte setzen oder eine Adresse auswählen.');
+    return;
+  }
+  const btn = container.querySelector('#grundstueckErfassenBtn');
+  const origLabel = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Suche Flurstück…'; }
+  try{
+    const res = await fetch(`${GRUNDSTUECK_SERVICE_URL}/grundstueck?lat=${obj.lat}&lng=${obj.lng}`);
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      throw new Error(data.error || `Dienst antwortete mit Status ${res.status}`);
+    }
+    obj.polygon = data.polygon;
+    obj.polygon_area = data.area_qm;
+    obj.grundstuecksgroesse = Math.round(data.area_qm);
+    obj.grundstueck_laenge = data.length_m;
+    obj.grundstueck_breite = data.width_m;
+    if(data.label) obj.flurstueck = data.label;
+    obj.flurstueck_amtlich = { label: data.label, area: data.area_qm, ref: data.nationalCadastralReference };
+    if(data.bodenrichtwert_eur_m2 != null){
+      obj.bodenrichtwert = Math.round(data.bodenrichtwert_eur_m2);
+      obj.bodenrichtwert_amtlich = {
+        wert: data.bodenrichtwert_eur_m2, stichtag: data.bodenrichtwert_stichtag,
+        nutzung: data.bodenrichtwert_nutzung, gemarkung: data.bodenrichtwert_gemarkung,
+        nummer: data.bodenrichtwert_nummer,
+      };
+    }
+    scheduleSave(obj);
+    renderKarteInto(container, obj);
+  }catch(err){
+    alert('Grundstücks-Dienst nicht erreichbar. Bitte prüfen, ob "python grundstueck_service.py" läuft (siehe Datei im Projektordner).\n\nDetails: ' + err.message);
+    if(btn){ btn.disabled = false; btn.textContent = origLabel; }
+  }
+}
+
+function initMap(obj, viewOverride){
+  if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+  const center = viewOverride ? viewOverride.center : ((obj.lat != null && obj.lng != null) ? [obj.lat, obj.lng] : DEFAULT_CENTER);
+  const zoom = viewOverride ? viewOverride.zoom : ((obj.lat != null) ? 18 : 9);
+  const map = L.map('map', {maxZoom:23}).setView(center, zoom);
+  MODAL.map = map;
+
+  const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:23, maxNativeZoom:20, attribution:'Esri World Imagery'}).addTo(map);
+  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:23, maxNativeZoom:19, attribution:'&copy; OpenStreetMap'});
+  const flurstueckeWms = L.tileLayer.wms(HESSEN_WMS_URL, {layers:HESSEN_WMS_LAYER, format:'image/png', transparent:true, version:'1.1.1', maxZoom:23, maxNativeZoom:19, attribution:'Geobasisdaten © HVBG'}).addTo(map);
+  L.control.layers({'Satellit (Esri)':esriSat, 'Straßenkarte (OSM)':osm}, {'Flurstücksgrenzen (Geoportal Hessen)':flurstueckeWms}).addTo(map);
+
+  const drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+  MODAL.drawnItems = drawnItems;
+  if(obj.grundstueck_teile && obj.grundstueck_teile.length){
+    obj.grundstueck_teile.forEach(t=>{
+      if(t.polygon && t.polygon.length) drawnItems.addLayer(L.polygon(t.polygon, {color:'#5B4CF0', weight:2, fillOpacity:0.15}));
+    });
+  } else if(obj.polygon && obj.polygon.length){
+    drawnItems.addLayer(L.polygon(obj.polygon, {color:'#5B4CF0', weight:2, fillOpacity:0.15}));
+  }
+  if(MULTI_SELECT && MULTI_SELECT.active){
+    MULTI_SELECT.results.forEach(r=>{
+      if(r.polygon && r.polygon.length) drawnItems.addLayer(L.polygon(r.polygon, {color:'#FF9500', weight:2, fillOpacity:0.2, dashArray:'4 3'}));
+    });
+  }
+
+  let marker = null;
+  if(obj.lat != null && obj.lng != null){
+    marker = L.marker([obj.lat, obj.lng], {draggable:true}).addTo(map);
+    marker.on('dragend', ()=>{
+      const p = marker.getLatLng();
+      obj.lat = p.lat; obj.lng = p.lng; scheduleSave(obj);
+    });
+  }
+
+  map.on('click', (e)=>{
+    if(MULTI_SELECT && MULTI_SELECT.active){
+      addMultiFlurstueckPoint(e.latlng.lat, e.latlng.lng, map);
+      return;
+    }
+    if(!marker){
+      marker = L.marker(e.latlng, {draggable:true}).addTo(map);
+      marker.on('dragend', ()=>{
+        const p = marker.getLatLng();
+        obj.lat = p.lat; obj.lng = p.lng; scheduleSave(obj);
+      });
+    } else { marker.setLatLng(e.latlng); }
+    obj.lat = e.latlng.lat; obj.lng = e.latlng.lng; scheduleSave(obj);
+    const btn = document.getElementById('grundstueckErfassenBtn');
+    if(btn){ btn.disabled = false; btn.removeAttribute('title'); }
+  });
+
+  setTimeout(()=>{ if(MODAL.map === map){ try{ map.invalidateSize(); }catch(e){} } }, 150);
+
+  async function addMultiFlurstueckPoint(lat, lng, mapRef){
+    try{
+      const res = await fetch(`${GRUNDSTUECK_SERVICE_URL}/grundstueck?lat=${lat}&lng=${lng}`);
+      const data = await res.json();
+      if(!res.ok || !data.ok){ alert(data.error || `Dienst antwortete mit Status ${res.status}`); return; }
+      if(MULTI_SELECT.results.some(r=>r.nationalCadastralReference === data.nationalCadastralReference)){
+        alert('Dieses Flurstück ist bereits in der Auswahl.');
+        return;
+      }
+      MULTI_SELECT.results.push(data);
+      MULTI_SELECT.savedView = {center: mapRef.getCenter(), zoom: mapRef.getZoom()};
+      const container = document.getElementById('karteSection');
+      if(container) renderKarteInto(container, obj);
+    }catch(err){
+      alert('Grundstücks-Dienst nicht erreichbar. Bitte prüfen, ob "python grundstueck_service.py" läuft.\n\nDetails: ' + err.message);
+    }
+  }
+}
+
+/* ---------------- TAB: AUFGABEN ---------------- */
+const TASK_CATEGORIES = ['Rechtliches','Finanzierung','Due Diligence','Dokumente','Termine','Kalkulation','Sonstiges'];
+
+function renderAufgabenTab(body, obj){
+  body.classList.remove('two-col');
+  const tasks = [...(obj.tasks||[])].sort((a,b)=>{
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    return (a.due||'9999').localeCompare(b.due||'9999');
+  });
+  body.innerHTML = `
+    <div class="section-title" style="margin-top:0;">Aufgaben &amp; Fälligkeiten</div>
+    ${tasks.length ? tasks.map(t=>{
+      const status = taskStatus(t);
+      const dueLabel = t.due ? (status==='overdue' ? `überfällig seit ${fmtDate(t.due)}` : `fällig ${fmtDate(t.due)}`) : 'kein Termin';
+      return `
+      <div class="task-row ${t.done?'done':''}" data-task="${t.id}">
+        <input type="checkbox" class="tcheck" ${t.done?'checked':''} data-task-done="${t.id}" />
+        <span class="tampel dot ${status}"></span>
+        <div class="ttext">
+          <div class="tt-main">${escapeHtml(t.text)}</div>
+          <div class="tt-meta">${dueLabel}${t.responsible?' · '+escapeHtml(t.responsible):''}${t.category?' · '+escapeHtml(t.category):''}</div>
+        </div>
+        <button class="btn small danger-outline" data-task-del="${t.id}">Entfernen</button>
+      </div>`;
+    }).join('') : '<div class="empty-state">Noch keine Aufgaben angelegt.</div>'}
+    <div class="add-row">
+      <input id="newTaskText" placeholder="Neue Aufgabe, z.B. Grundbuchauszug anfordern" style="flex:2;" />
+      <select id="newTaskCategory">
+        ${TASK_CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select>
+      <input id="newTaskDue" type="date" />
+      <input id="newTaskResp" placeholder="Verantwortlich" />
+      <button class="btn primary" id="addTaskBtn">Hinzufügen</button>
+    </div>
+  `;
+  body.querySelectorAll('[data-task-done]').forEach(el=>{
+    el.addEventListener('change', ()=>{
+      const t = obj.tasks.find(t=>t.id===el.dataset.taskDone);
+      if(t){ t.done = el.checked; scheduleSave(obj); renderApp(); }
+    });
+  });
+  body.querySelectorAll('[data-task-del]').forEach(el=>{
+    el.addEventListener('click', ()=>{ obj.tasks = obj.tasks.filter(t=>t.id!==el.dataset.taskDel); scheduleSave(obj); renderApp(); });
+  });
+  document.getElementById('addTaskBtn').addEventListener('click', ()=>{
+    const text = document.getElementById('newTaskText').value.trim();
+    if(!text) return;
+    const due = document.getElementById('newTaskDue').value;
+    const responsible = document.getElementById('newTaskResp').value.trim();
+    const category = document.getElementById('newTaskCategory').value;
+    obj.tasks = obj.tasks || [];
+    obj.tasks.push({id:taskId(), text, due: due||null, responsible, category, done:false});
+    scheduleSave(obj);
+    renderApp();
+  });
+}
+
+/* ---------------- TAB: DOKUMENTE ---------------- */
+function renderDokumenteTab(body, obj){
+  body.classList.remove('two-col');
+  const docs = obj.documents || [];
+  body.innerHTML = `
+    <div class="section-title" style="margin-top:0;">Dokumente</div>
+    <div class="empty-state" style="text-align:left; padding:10px 0; background:transparent;">
+      Hinweis: Hier können Links zu Dokumenten (z.B. Google Drive, Exposé-PDF, Grundbuchauszug) hinterlegt werden – ein direkter Datei-Upload ist in diesem Tool nicht möglich.
+    </div>
+    ${docs.length ? docs.map(d=>`
+      <div class="doc-row" data-doc="${d.id}">
+        <div style="flex:1;"><div class="doc-name">${escapeHtml(d.name)}</div>${d.note ? `<div class="doc-note">${escapeHtml(d.note)}</div>` : ''}</div>
+        ${d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">Öffnen ↗</a>` : ''}
+        <button class="btn small danger-outline" data-doc-del="${d.id}">Entfernen</button>
+      </div>
+    `).join('') : '<div class="empty-state">Noch keine Dokumente hinterlegt.</div>'}
+    <div class="add-row">
+      <input id="newDocName" placeholder="Bezeichnung, z.B. Exposé" />
+      <input id="newDocUrl" placeholder="Link (https://...)" style="flex:2;" />
+      <input id="newDocNote" placeholder="Notiz (optional)" />
+      <button class="btn primary" id="addDocBtn">Hinzufügen</button>
+    </div>
+  `;
+  body.querySelectorAll('[data-doc-del]').forEach(el=>{
+    el.addEventListener('click', ()=>{ obj.documents = obj.documents.filter(d=>d.id!==el.dataset.docDel); scheduleSave(obj); renderApp(); });
+  });
+  document.getElementById('addDocBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('newDocName').value.trim();
+    if(!name) return;
+    const url = document.getElementById('newDocUrl').value.trim();
+    const note = document.getElementById('newDocNote').value.trim();
+    obj.documents = obj.documents || [];
+    obj.documents.push({id:docId(), name, url, note});
+    scheduleSave(obj);
+    renderApp();
+  });
+}
+
+/* ==================== EXCEL SYNC ==================== */
+const EXCEL_STATE = { handle:null, fileName:null, syncing:false, needsPermission:false };
+
+function idbOpen(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open('pipeline_excel_db', 1);
+    req.onupgradeneeded = ()=>{ req.result.createObjectStore('handles'); };
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = ()=>reject(req.error);
+  });
+}
+async function idbSetHandle(handle){
+  try{
+    const db = await idbOpen();
+    await new Promise((resolve,reject)=>{
+      const tx = db.transaction('handles','readwrite');
+      tx.objectStore('handles').put(handle, 'excelFile');
+      tx.oncomplete = resolve; tx.onerror = ()=>reject(tx.error);
+    });
+  }catch(e){ console.error('idbSetHandle failed', e); }
+}
+async function idbGetHandle(){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve,reject)=>{
+      const tx = db.transaction('handles','readonly');
+      const req = tx.objectStore('handles').get('excelFile');
+      req.onsuccess = ()=>resolve(req.result||null);
+      req.onerror = ()=>reject(req.error);
+    });
+  }catch(e){ console.error('idbGetHandle failed', e); return null; }
+}
+async function idbClearHandle(){
+  try{
+    const db = await idbOpen();
+    const tx = db.transaction('handles','readwrite');
+    tx.objectStore('handles').delete('excelFile');
+  }catch(e){}
+}
+
+async function excelTryRestoreHandle(){
+  if(typeof window.showSaveFilePicker !== 'function') return;
+  const handle = await idbGetHandle();
+  if(!handle) return;
+  try{
+    const perm = await handle.queryPermission({mode:'readwrite'});
+    if(perm === 'granted'){
+      EXCEL_STATE.handle = handle;
+      EXCEL_STATE.fileName = handle.name;
+      await excelAutoImportFromHandle(handle);
+    } else {
+      EXCEL_STATE.handle = null;
+      EXCEL_STATE.fileName = handle.name;
+      EXCEL_STATE.needsPermission = true;
+      EXCEL_STATE.pendingHandle = handle;
+    }
+  }catch(e){ console.error('Berechtigungsprüfung fehlgeschlagen', e); }
+  renderExcelBox();
+}
+
+async function excelConfirmPermission(){
+  const handle = EXCEL_STATE.pendingHandle;
+  if(!handle) return;
+  try{
+    const perm = await handle.requestPermission({mode:'readwrite'});
+    if(perm === 'granted'){
+      EXCEL_STATE.handle = handle;
+      EXCEL_STATE.fileName = handle.name;
+      EXCEL_STATE.needsPermission = false;
+      EXCEL_STATE.pendingHandle = null;
+      await excelAutoImportFromHandle(handle);
+      const [objects, contacts] = await Promise.all([storageList(STORE_PREFIX), storageList(CONTACT_PREFIX)]);
+      STATE.objects = objects;
+      STATE.contacts = contacts;
+      renderApp();
+      renderExcelBox();
+    }
+  }catch(e){ console.error('Berechtigung fehlgeschlagen', e); }
+}
+
+/* Wird beim Öffnen des Tools (bzw. sobald Zugriff auf die verknüpfte Datei besteht)
+   einmalig aufgerufen, damit Änderungen, die direkt in Excel gemacht wurden,
+   automatisch in die lokale Datenbank übernommen werden. */
+async function excelAutoImportFromHandle(handle){
+  try{
+    const file = await handle.getFile();
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    await excelApplyWorkbook(wb);
+    setExcelStatus(`Beim Öffnen aus "${EXCEL_STATE.fileName}" aktualisiert · ${new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`, true);
+  }catch(e){
+    console.error('Automatischer Excel-Import beim Start fehlgeschlagen', e);
+  }
+}
+const EXCEL_COLUMNS = [
+  'ID','Titel','Typ','Phase','Straße','PLZ','Ort','Bundesland',
+  'Grundstücksgröße_m2','Wohnfläche_m2','Parzellen_Einheiten',
+  'Nettokaufpreis','GIK','Deckungsbeitrag','Marge_Pct','EK_Rendite_Pct',
+  'Latitude','Longitude','Google_Maps_Link','Eingezeichnete_Flaeche_m2',
+  'Ansprechpartner','Telefon','Email','Quelle','AbsageGrund','ErstelltAm','AktualisiertAm',
+];
+
+function objectToExcelRow(o){
+  const r = getCalcResult(o);
+  const contact = o.kontakt_id ? getContact(o.kontakt_id) : null;
+  const gmapsLink = (o.lat!=null && o.lng!=null)
+    ? `https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lng}`
+    : (o.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([o.address,o.plz,o.ort].filter(Boolean).join(', '))}` : '');
+  return {
+    ID:o.id, Titel:o.title, Typ:o.type==='pe'?'Projektentwicklung':'MFH-Aufteilung', Phase:phaseLabel(o.phase),
+    'Straße':o.address, PLZ:o.plz, Ort:o.ort, Bundesland:o.bundesland,
+    'Grundstücksgröße_m2':o.grundstuecksgroesse, 'Wohnfläche_m2':o.wohnflaeche, Parzellen_Einheiten:o.einheiten,
+    Nettokaufpreis: o.type==='pe' ? (o.calc&&o.calc.nettokaufpreis) : null,
+    GIK: r.gik!=null?r.gik:null, Deckungsbeitrag: r.deckungsbeitrag!=null?r.deckungsbeitrag:null,
+    Marge_Pct: r.deckungsbeitrag_pct!=null?Math.round(r.deckungsbeitrag_pct*100)/100:null,
+    EK_Rendite_Pct: r.ek_rendite_pct!=null?Math.round(r.ek_rendite_pct*100)/100:null,
+    Latitude:o.lat, Longitude:o.lng, Google_Maps_Link:gmapsLink,
+    Eingezeichnete_Flaeche_m2: o.polygon_area!=null ? Math.round(o.polygon_area) : null,
+    Ansprechpartner: contact?contact.name:'', Telefon: contact?contact.telefon:'', Email: contact?contact.email:'',
+    Quelle:o.quelle, AbsageGrund:o.absage_grund,
+    ErstelltAm:(o.createdAt||'').slice(0,10), AktualisiertAm:(o.updatedAt||'').slice(0,10),
+  };
+}
+
+const PARZELLEN_COLUMNS = [
+  'Objekt_ID','Objekt_Titel','Parzelle_Nr','Wohnflaeche_m2','Baukosten_je_m2','Hauskosten',
+  'Grundstueck_m2','Verkaufspreis_Haus','Gestehungskosten','Deckungsbeitrag',
+];
+const BNK_COLUMNS = ['Objekt_ID','Objekt_Titel','Bezeichnung','Modus','Ansatz','Gesamt'];
+
+function objectToParzellenRows(o){
+  if(o.type !== 'pe') return [];
+  const r = getCalcResult(o);
+  return (r.parzellenErgebnis||[]).slice(0,10).map((p,i)=>({
+    Objekt_ID:o.id, Objekt_Titel:o.title, Parzelle_Nr:i+1,
+    Wohnflaeche_m2:p.wohnflaeche, Baukosten_je_m2:p.baukosten_pro_m2, Hauskosten:p.hauskosten,
+    Grundstueck_m2:p.grundstueck_qm!=null?Math.round(p.grundstueck_qm):null,
+    Verkaufspreis_Haus:p.verkaufspreis_haus, Gestehungskosten:Math.round(p.gestehungskosten),
+    Deckungsbeitrag:Math.round(p.deckungsbeitrag_grundstueck),
+  }));
+}
+function objectToBnkRows(o){
+  if(o.type !== 'pe') return [];
+  const r = getCalcResult(o);
+  return (r.baunebenkostenItems||[]).slice(0,10).map(item=>({
+    Objekt_ID:o.id, Objekt_Titel:o.title, Bezeichnung:item.label,
+    Modus: item.mode==='je_haus' ? 'je Haus' : 'Pauschal', Ansatz:item.ansatz, Gesamt:item.gesamt,
+  }));
+}
+
+function buildWorkbook(){
+  const rows = STATE.objects.map(objectToExcelRow);
+  const ws = XLSX.utils.json_to_sheet(rows, {header:EXCEL_COLUMNS});
+  ws['!cols'] = EXCEL_COLUMNS.map(c=>({wch: Math.max(12, c.length+2)}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Pipeline');
+
+  const parzellenRows = STATE.objects.flatMap(objectToParzellenRows);
+  const wsParzellen = XLSX.utils.json_to_sheet(parzellenRows, {header:PARZELLEN_COLUMNS});
+  wsParzellen['!cols'] = PARZELLEN_COLUMNS.map(c=>({wch: Math.max(14, c.length+2)}));
+  XLSX.utils.book_append_sheet(wb, wsParzellen, 'Parzellen');
+
+  const bnkRows = STATE.objects.flatMap(objectToBnkRows);
+  const wsBnk = XLSX.utils.json_to_sheet(bnkRows, {header:BNK_COLUMNS});
+  wsBnk['!cols'] = BNK_COLUMNS.map(c=>({wch: Math.max(14, c.length+2)}));
+  XLSX.utils.book_append_sheet(wb, wsBnk, 'Baunebenkosten');
+
+  return wb;
+}
+
+let excelSyncTimer = null;
+function scheduleExcelSync(){
+  if(!EXCEL_STATE.handle) return;
+  clearTimeout(excelSyncTimer);
+  excelSyncTimer = setTimeout(()=>{ excelWriteToHandle(); }, 700);
+}
+
+async function excelWriteToHandle(){
+  if(!EXCEL_STATE.handle || EXCEL_STATE.syncing) return;
+  EXCEL_STATE.syncing = true;
+  try{
+    const wb = buildWorkbook();
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    const writable = await EXCEL_STATE.handle.createWritable();
+    await writable.write(wbout);
+    await writable.close();
+    setExcelStatus(`Synchronisiert mit "${EXCEL_STATE.fileName}" · ${fmtDate(todayStr())} ${new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`, true);
+  }catch(e){
+    console.error('Excel-Sync fehlgeschlagen', e);
+    setExcelStatus('Synchronisierung fehlgeschlagen – erneut verknüpfen', false);
+  }
+  EXCEL_STATE.syncing = false;
+}
+
+function setExcelStatus(text, linked){
+  const el = document.getElementById('excelStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.classList.toggle('linked', !!linked);
+}
+
+async function excelLinkFile(){
+  try{
+    const handle = await window.showSaveFilePicker({
+      suggestedName: 'pipeline.xlsx',
+      types: [{ description:'Excel-Datei', accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']} }],
+    });
+    EXCEL_STATE.handle = handle;
+    EXCEL_STATE.fileName = handle.name;
+    EXCEL_STATE.needsPermission = false;
+    EXCEL_STATE.pendingHandle = null;
+    await idbSetHandle(handle);
+    await excelWriteToHandle();
+    renderExcelBox();
+  }catch(e){
+    if(e && e.name !== 'AbortError') console.error('Excel-Verknüpfung fehlgeschlagen', e);
+  }
+}
+
+function excelDownloadExport(){
+  const wb = buildWorkbook();
+  XLSX.writeFile(wb, 'pipeline.xlsx');
+}
+
+async function excelImportFromFile(file){
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, {type:'array'});
+  const { created, updated } = await excelApplyWorkbook(wb);
+  renderApp();
+  alert(`Import abgeschlossen: ${created} neu, ${updated} aktualisiert.`);
+}
+
+/* Übernimmt die Zeilen eines eingelesenen Workbooks (Pipeline/Parzellen/Baunebenkosten)
+   in STATE.objects + localStorage. WICHTIG: STATE.objects muss zu diesem Zeitpunkt bereits
+   mit den echten, gespeicherten Objekten befüllt sein (sonst würde getObj() nichts finden
+   und jedes bestehende Objekt fälschlich per newObject() neu angelegt und dabei alle nicht
+   in Excel enthaltenen Felder wie Notizen/Aufgaben/Flurstück zurückgesetzt). */
+async function excelApplyWorkbook(wb){
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, {defval:null});
+  const parzellenWs = wb.Sheets['Parzellen'];
+  const parzellenRows = parzellenWs ? XLSX.utils.sheet_to_json(parzellenWs, {defval:null}) : [];
+  const bnkWs = wb.Sheets['Baunebenkosten'];
+  const bnkRows = bnkWs ? XLSX.utils.sheet_to_json(bnkWs, {defval:null}) : [];
+  let created = 0, updated = 0;
+  for(const row of rows){
+    const typeRaw = (row.Typ||'').toString().toLowerCase();
+    const type = typeRaw.includes('mfh') ? 'mfh' : 'pe';
+    let obj = row.ID ? getObj(row.ID) : null;
+    if(!obj){
+      obj = newObject(type);
+      if(row.ID) obj.id = row.ID;
+      STATE.objects.push(obj);
+      created++;
+    } else { updated++; }
+    if(row.Titel) obj.title = String(row.Titel);
+    if(row['Straße']!=null) obj.address = String(row['Straße']);
+    if(row.PLZ!=null) obj.plz = String(row.PLZ);
+    if(row.Ort!=null) obj.ort = String(row.Ort);
+    if(row.Bundesland!=null && GRUNDERWERBSTEUER[row.Bundesland]!=null) obj.bundesland = row.Bundesland;
+    if(row['Grundstücksgröße_m2']!=null) obj.grundstuecksgroesse = Number(row['Grundstücksgröße_m2']);
+    if(row['Wohnfläche_m2']!=null) obj.wohnflaeche = Number(row['Wohnfläche_m2']);
+    if(row.Parzellen_Einheiten!=null) obj.einheiten = Number(row.Parzellen_Einheiten);
+    if(row.Quelle!=null) obj.quelle = String(row.Quelle);
+    if(row.AbsageGrund!=null) obj.absage_grund = String(row.AbsageGrund);
+    if(row.Latitude!=null && row.Latitude!=='' && !isNaN(Number(row.Latitude))) obj.lat = Number(row.Latitude);
+    if(row.Longitude!=null && row.Longitude!=='' && !isNaN(Number(row.Longitude))) obj.lng = Number(row.Longitude);
+    if(obj.type==='pe' && row.Nettokaufpreis!=null && obj.calc){ obj.calc.nettokaufpreis = Number(row.Nettokaufpreis); }
+    obj.updatedAt = new Date().toISOString();
+    await storageSave(STORE_PREFIX, obj);
+  }
+
+  if(parzellenRows.length || bnkRows.length){
+    const byId = {};
+    STATE.objects.forEach(o=>{ byId[o.id] = o; });
+
+    const parzGrouped = {};
+    parzellenRows.forEach(row=>{
+      const id = row.Objekt_ID; if(!id || !byId[id]) return;
+      (parzGrouped[id] = parzGrouped[id]||[]).push(row);
+    });
+    Object.keys(parzGrouped).forEach(id=>{
+      const obj = byId[id];
+      if(obj.type!=='pe' || !obj.calc) return;
+      const sorted = parzGrouped[id].sort((a,b)=>(a.Parzelle_Nr||0)-(b.Parzelle_Nr||0)).slice(0,10);
+      obj.calc.parcels = sorted.map(r=>({
+        id: taskId(),
+        wohnflaeche: r.Wohnflaeche_m2!=null ? Number(r.Wohnflaeche_m2) : 0,
+        baukosten_pro_m2: r.Baukosten_je_m2!=null ? Number(r.Baukosten_je_m2) : 0,
+        verkaufspreis_haus: r.Verkaufspreis_Haus!=null ? Number(r.Verkaufspreis_Haus) : 0,
+        grundstueck_qm: (r.Grundstueck_m2!=null && r.Grundstueck_m2!=='') ? Number(r.Grundstueck_m2) : null,
+      }));
+      if(!obj.calc.parcels.length) obj.calc.parcels = [newParcel()];
+      obj.einheiten = obj.calc.parcels.length;
+    });
+
+    const bnkGrouped = {};
+    bnkRows.forEach(row=>{
+      const id = row.Objekt_ID; if(!id || !byId[id]) return;
+      (bnkGrouped[id] = bnkGrouped[id]||[]).push(row);
+    });
+    Object.keys(bnkGrouped).forEach(id=>{
+      const obj = byId[id];
+      if(obj.type!=='pe' || !obj.calc) return;
+      obj.calc.baunebenkosten_items = bnkGrouped[id].slice(0,10).map(r=>({
+        id: bnkId(),
+        label: r.Bezeichnung!=null ? String(r.Bezeichnung) : '',
+        mode: (r.Modus||'').toString().toLowerCase().includes('je haus') ? 'je_haus' : 'pauschal',
+        ansatz: r.Ansatz!=null ? Number(r.Ansatz) : 0,
+      }));
+      if(!obj.calc.baunebenkosten_items.length){
+        obj.calc.baunebenkosten_items = [{id:bnkId(), label:'Sonstiges', mode:'pauschal', ansatz:0}];
+      }
+    });
+
+    const touchedIds = new Set([...Object.keys(parzGrouped), ...Object.keys(bnkGrouped)]);
+    for(const id of touchedIds){
+      const obj = byId[id];
+      if(!obj || obj.type!=='pe' || !obj.calc) continue;
+      obj.updatedAt = new Date().toISOString();
+      await storageSave(STORE_PREFIX, obj);
+    }
+  }
+
+  return { created, updated };
+}
+
+function renderExcelBox(){
+  const statusEl = document.getElementById('excelStatus');
+  const actionsEl = document.getElementById('excelActions');
+  if(!statusEl || !actionsEl) return;
+  const hasFsApi = typeof window.showSaveFilePicker === 'function';
+
+  if(EXCEL_STATE.handle){
+    statusEl.classList.add('linked');
+    if(!statusEl.textContent || statusEl.textContent==='Keine Datei verknüpft'){
+      statusEl.textContent = `Verknüpft: ${EXCEL_STATE.fileName}`;
+    }
+  } else if(EXCEL_STATE.needsPermission){
+    statusEl.classList.remove('linked');
+    statusEl.textContent = `"${EXCEL_STATE.fileName}" verknüpft – Zugriff erneut bestätigen`;
+  } else {
+    statusEl.classList.remove('linked');
+    statusEl.textContent = hasFsApi ? 'Keine Datei verknüpft' : 'Auto-Sync in diesem Browser nicht verfügbar';
+  }
+
+  actionsEl.innerHTML = `
+    ${EXCEL_STATE.needsPermission ? `<button id="excelConfirmBtn" class="primary-ish">Zugriff bestätigen</button>` : ''}
+    ${hasFsApi ? `<button id="excelLinkBtn" class="${(EXCEL_STATE.handle||EXCEL_STATE.needsPermission)?'':'primary-ish'}">${EXCEL_STATE.handle?'Andere Datei verknüpfen':'Excel-Datei verknüpfen'}</button>` : ''}
+    <button id="excelExportBtn">Als Excel exportieren</button>
+    <label for="excelImportInput">Excel importieren</label>
+    <input type="file" id="excelImportInput" accept=".xlsx,.xls" style="display:none;" />
+  `;
+  const confirmBtn = document.getElementById('excelConfirmBtn');
+  if(confirmBtn) confirmBtn.addEventListener('click', excelConfirmPermission);
+  const linkBtn = document.getElementById('excelLinkBtn');
+  if(linkBtn) linkBtn.addEventListener('click', excelLinkFile);
+  document.getElementById('excelExportBtn').addEventListener('click', excelDownloadExport);
+  document.getElementById('excelImportInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(file) excelImportFromFile(file);
+    e.target.value = '';
+  });
+}
+
+
+/* ==================== BOOTSTRAP ==================== */
+document.getElementById('nav').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.nav-item');
+  if(!btn) return;
+  if(MODAL.map){ MODAL.map.remove(); MODAL.map = null; }
+  if(KARTE_VIEW.map){ KARTE_VIEW.map.remove(); KARTE_VIEW.map = null; }
+  MODAL.objectId = null;
+  STATE.view = btn.dataset.view;
+  STATE.filters.search = '';
+  renderApp();
+});
+document.getElementById('btnNew').addEventListener('click', openNewObjectFlow);
+
+async function init(){
+  STATE.loading = true;
+  renderApp();
+  renderExcelBox();
+  const [objects, contacts] = await Promise.all([storageList(STORE_PREFIX), storageList(CONTACT_PREFIX)]);
+  STATE.objects = objects;
+  STATE.contacts = contacts;
+  STATE.loading = false;
+  renderApp();
+  // Erst NACHDEM STATE.objects mit den echten gespeicherten Objekten befüllt ist,
+  // die verknüpfte Excel-Datei einlesen (siehe Kommentar bei excelApplyWorkbook).
+  await excelTryRestoreHandle();
+  renderApp();
+}
+init();
+</script>
+</body>
+</html>
+
