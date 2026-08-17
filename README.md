@@ -4,8 +4,7 @@ Internal CRM for property deal intake, pipeline review, project-development calc
 
 ## Recommended Architecture
 
-This project should be built as a pragmatic modular monolith:
-
+This project uses a modular FastAPI backend and a React frontend. The backend is organized by feature areas such as deals, calculations, n8n imports, Excel import/export, and map/parcel lookup.
 ```text
 frontend/  React + Vite + TypeScript
 backend/   FastAPI API + services + data adapters
