@@ -12,6 +12,7 @@ CRM/
             calculations.py
             parcels.py
             n8n.py
+            integrations.py
           router.py
       core/
         config.py
@@ -68,6 +69,7 @@ CRM/
 
   docs/
     ARCHITECTURE.md
+    N8N_PARZELLIERUNG_INTEGRATION.md
     PROJECT_STRUCTURE.md
 
   legacy prototype/reference files:
@@ -120,4 +122,3 @@ Recommended order:
 4. n8n ingestion.
 5. Excel import/export.
 6. Contacts, tasks, documents.
-

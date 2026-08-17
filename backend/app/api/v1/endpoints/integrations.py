@@ -8,8 +8,8 @@ from app.services.n8n_service import N8NService
 router = APIRouter()
 
 
-@router.post("/deals", response_model=N8NImportResult)
-def ingest_deal(
+@router.post("/email-offers", response_model=N8NImportResult)
+def ingest_email_offer(
     payload: N8NDealPayload,
     x_n8n_token: str | None = Header(default=None),
 ) -> N8NImportResult:
@@ -18,8 +18,8 @@ def ingest_deal(
     return N8NService(deal_repository).ingest_deal(payload)
 
 
-@router.post("/parzellierung/deals", response_model=N8NImportResult)
-def ingest_parzellierung_deal(
+@router.post("/email-offers/parzellierung", response_model=N8NImportResult)
+def ingest_parzellierung_email_offer(
     payload: N8NDealPayload,
     x_n8n_token: str | None = Header(default=None),
 ) -> N8NImportResult:
